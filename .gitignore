@@ -1,0 +1,36 @@
+# Node / pnpm
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Env files
+**/.env
+**/.env.*
+.env*
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Coverage
+coverage/

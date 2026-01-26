@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+
+////////////////////
+// AUTH
+////////////////////
+
+model AuthAccount {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  createdAt     DateTime @default(now())
+
+  user          User?
+  refreshTokens AuthRefreshToken[]
+
+  @@map("auth_accounts")
+}
+
+model AuthRefreshToken {
+  id          String   @id @default(uuid())
+  accountId  String
+  tokenHash  String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  account    AuthAccount @relation(fields: [accountId], references: [id])
+
+  @@index([accountId])
+  @@map("auth_refresh_tokens")
+}
+
+
+
+
+////////////////////
+// USERS
+////////////////////
+
+model User {
+  id              String   @id @default(uuid())
+  authAccountId   String   @unique
+  username        String   @unique
+  email           String   @unique
+  displayName     String?
+  profileImageKey String?
+  createdAt       DateTime @default(now())
+
+  authAccount     AuthAccount @relation(fields: [authAccountId], references: [id])
+  organizedMeetups Meetup[]
+  participations   Participation[]
+
+  @@map("users")
+}
+
+
+
+
+////////////////////
+// MEETUPS
+////////////////////
+
+model Meetup {
+  id          String   @id @default(uuid())
+  organizerId String
+  title       String
+  description String?
+  startTime   DateTime
+  capacity    Int?
+  status      MeetupStatus
+  createdAt  DateTime @default(now())
+
+  organizer   User            @relation(fields: [organizerId], references: [id])
+  participants Participation[]
+
+  @@index([organizerId])
+  @@index([status])
+  @@map("meetups")
+}
+
+enum MeetupStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  ENDED
+}
+
+
+
+
+////////////////////
+// PARTICIPATION
+////////////////////
+
+model Participation {
+  id         String               @id @default(uuid())
+  meetupId  String
+  userId    String
+  status    ParticipationStatus
+  createdAt DateTime             @default(now())
+
+  meetup    Meetup @relation(fields: [meetupId], references: [id])
+  user      User   @relation(fields: [userId], references: [id])
+
+  @@unique([meetupId, userId])
+  @@index([meetupId])
+  @@index([userId])
+  @@map("participations")
+}
+
+enum ParticipationStatus {
+  REQUESTED
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+}
