@@ -31,12 +31,19 @@ export type UserUpdateRecord = {
     profileImageKey?: string;
 }
 
+export type SignedUrlResponse = {
+  signedUrl: string;
+  key: string;
+  publicUrl: string;
+}
+
 
 export interface UserService {
     createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
+    findUserbyAuthId(authAccountId: string): Promise<UserRecord | null>;
     getUserByUsername(username: string): Promise<Partial<UserRecord> | null>;
     updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<Partial<UserRecord>>;
-    getProfileUploadUrl(userId: string, fileType: string): Promise<{ signedUrl: string; key: string; publicUrl: string }>;
+    getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse>;
 }
 
 class UserServiceImpl implements UserService {
@@ -56,6 +63,11 @@ class UserServiceImpl implements UserService {
             throw new AppError("Username already taken");
         }
 
+    }
+
+    async findUserbyAuthId(authAccountId: string): Promise<UserRecord | null> {
+        const user =  await userRepo.findByAuthId(authAccountId);
+        return user;
     }
 
     async getUserByUsername(username: string): Promise<Partial<UserRecord> | null> {
@@ -89,13 +101,13 @@ class UserServiceImpl implements UserService {
         return userProfile;
     }
 
-    async getProfileUploadUrl(fileType: string): Promise<{ signedUrl: string; key: string; publicUrl: string }> {
+    async getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse> {
         
         if(!fileType.startsWith("image/")){
             throw new AppError("Invalid file type. Only image files are allowed.");
         }
 
-        const uploadData = await getPresignedUploadUrl('profiles', fileType);
+        const uploadData = await getPresignedUploadUrl(userId, 'profiles', fileType);
         return uploadData;
     }
 

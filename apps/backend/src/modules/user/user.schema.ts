@@ -16,11 +16,11 @@ export const userParamsSchema = z.object({
   username: z.string().min(5),
 })
 
-export const userProfileUploadSchema = z.object({
+export const userUploadUrlSchema = z.object({
   fileType: z.enum(["image/jpeg", "image/png", "image/webp"]),
 })
 
-export const profileUploadCompleteSchema = z.object({
+export const userUploadCompleteSchema = z.object({
   profileImageKey: z.string()
 })
 

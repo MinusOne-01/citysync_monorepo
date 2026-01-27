@@ -132,9 +132,7 @@ export const authService = {
     }
 
     // Load user (identity)
-    const user = await prisma.user.findUnique({
-      where: { authAccountId: account.id }
-    })
+    const user = await userService.findUserbyAuthId(account.id);
 
     if (!user) {
       // This should never happen if register is correct

@@ -1,11 +1,11 @@
 import { Router } from "express"
-import { CreateMeetupSchema, PublishMeetupSchema } from "./meetup.schema"
+import { CreateMeetupSchema, EditMeetupSchema, MeetupUploadUrlSchema, PublishMeetupSchema } from "./meetup.schema"
 import { meetupService } from "./meetup.service"
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 
 export function registerMeetupRoutes(router: Router) {
 
-  router.post("/meetups", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  router.post("/meetups/create", authMiddleware, async (req: AuthenticatedRequest, res) => {
 
     if (!req.user) {
       return res.status(401).json({ error: "User context missing" });
@@ -27,6 +27,41 @@ export function registerMeetupRoutes(router: Router) {
     );
 
     res.status(201).json({ meetupId });
+  })
+
+  router.post("/meetups/upload-url", authMiddleware, async (req: AuthenticatedRequest, res) => {
+
+    if (!req.user) {
+      return res.status(401).json({ error: "User context missing" });
+    }
+
+    const parsed = MeetupUploadUrlSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.flatten()
+      })
+    };
+    const userId = req.user.userId;
+    const fileType = parsed.data.fileType;
+    const uploadData = await meetupService.getMeetupUploadUrl(userId, fileType);
+
+    res.status(200).json(uploadData);
+  })
+
+  router.get("/meetups/:meetupId", async (req, res) => {
+    
+    const parsed = PublishMeetupSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.flatten()
+      })
+    };
+    
+    const meetupId = req.params.meetupId as string;
+    const meetup = await meetupService.findMeetup(meetupId);
+    res.status(200).json({ meetup });
   })
 
   router.put("/meetups/:meetupId/publish", authMiddleware, async (req: AuthenticatedRequest, res) => {
@@ -56,7 +91,7 @@ export function registerMeetupRoutes(router: Router) {
       return res.status(401).json({ error: "User context missing" });
     }
 
-    const parsedParams = CreateMeetupSchema.safeParse(req.body);
+    const parsedParams = EditMeetupSchema.safeParse(req.body);
 
     if (!parsedParams.success) {
       return res.status(400).json({

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 import { userService } from "./user.service";
-import { createUserSchema, profileUploadCompleteSchema, updateUserSchema, userParamsSchema, userProfileUploadSchema } from "./user.schema";
+import { createUserSchema, userUploadCompleteSchema, updateUserSchema, userParamsSchema, userUploadUrlSchema } from "./user.schema";
 
 export function registeredUserRoutes(router: Router) {
 
@@ -49,14 +49,15 @@ export function registeredUserRoutes(router: Router) {
       return res.status(401).json({ error: "User context missing" });
     }
 
-    const parsed = userProfileUploadSchema.safeParse(req.body);
+    const parsed = userUploadUrlSchema.safeParse(req.body);
 
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() })
     }
 
+    const userId = req.user.userId;
     const fileType = parsed.data.fileType;
-    const uploadData = await userService.getProfileUploadUrl(fileType);
+    const uploadData = await userService.getProfileUploadUrl(userId, fileType);
 
     return  res.status(200).json({ uploadData });
   });
@@ -67,7 +68,7 @@ export function registeredUserRoutes(router: Router) {
       return res.status(401).json({ error: "User context missing" });
     }
 
-    const parsed = profileUploadCompleteSchema.safeParse(req.body);
+    const parsed = userUploadCompleteSchema.safeParse(req.body);
 
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() })

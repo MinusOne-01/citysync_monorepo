@@ -1,6 +1,7 @@
 import { MeetupId, MeetupStatus, CreateMeetupInput } from "./meetup.service"
 import { prisma } from "../../shared/db"
 
+
 export interface MeetupRecord {
   id: MeetupId
   organizerId: string
@@ -10,7 +11,9 @@ export interface MeetupRecord {
   capacity: number | null
   status: MeetupStatus
   createdAt: Date
+  meetupImageKey: string
 }
+
 
 
 export interface MeetupRepository {
@@ -54,7 +57,8 @@ export class meetupRepoImpl implements MeetupRepository {
         description: input.description,
         startTime: input.startTime,
         capacity: input.capacity,
-        status: "DRAFT"
+        status: "DRAFT",
+        meetupImageKey: input.meetupImageKey
       }
     })
     return record.id
@@ -65,7 +69,7 @@ export class meetupRepoImpl implements MeetupRepository {
   ): Promise<MeetupRecord | null>
   {
     const record = await prisma.meetup.findUnique({
-      where: { id: meetupId }
+      where: { id: meetupId, status: "PUBLISHED" }
     })
     return record
   }
@@ -98,9 +102,15 @@ export class meetupRepoImpl implements MeetupRepository {
   ): Promise<void>
   {
     await prisma.meetup.update({
-      where: { id: meetupId, organizerId },
+      where: {
+        id: meetupId,
+        organizerId,
+        status: { in: ["DRAFT", "PUBLISHED"] }
+      },
       data
     })
+
+
   }
 
 }

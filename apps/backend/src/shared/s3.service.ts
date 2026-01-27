@@ -24,13 +24,14 @@ const s3Client = new S3Client({
 
 // Function to generate a presigned URL for uploading files to S3
 export const getPresignedUploadUrl = async (
+    userId: string,
     category: "profiles" | "meetups",
     mimeType: string
 ) => {
 
     const mediaId = crypto.randomUUID();
     const extension = mimeType.split("/")[1];
-    const key = `${category}/${mediaId}.${extension}`;
+    const key = `${category}/${userId}/${mediaId}.${extension}`;
 
     const command = new PutObjectCommand({
         Bucket: BUCKET,
