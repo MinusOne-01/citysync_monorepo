@@ -10,6 +10,7 @@ const BUCKET = env.AWS_S3_BUCKET!;
 const ACCESS_KEY_ID = env.AWS_ACCESS_KEY_ID!;
 const SECRET_ACCESS_KEY = env.AWS_SECRET_ACCESS_KEY!;
 
+
 //s3 config setup
 const s3Client = new S3Client({
     region: process.env.AWS_REGION,
@@ -20,38 +21,37 @@ const s3Client = new S3Client({
 });
 
 
+
 // Function to generate a presigned URL for uploading files to S3
 export const getPresignedUploadUrl = async (
-    category: 'profiles' | 'meetups', 
-    fileType: string
+    category: "profiles" | "meetups",
+    mimeType: string
 ) => {
 
     const mediaId = crypto.randomUUID();
-    const extension = fileType.split("/")[1]; // jpeg, png, webp
+    const extension = mimeType.split("/")[1];
     const key = `${category}/${mediaId}.${extension}`;
 
     const command = new PutObjectCommand({
         Bucket: BUCKET,
         Key: key,
-        ContentType: fileType
+        ContentType: mimeType
     });
 
-    // Link expires in 60 seconds for security
+    // Link expires in 300 seconds for security
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
+
+    const publicUrl = `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
     return {
         signedUrl,
         key,
-        publicUrl: `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`
+        publicUrl
     };
 
 };
 
 export const deleteS3Object = async (oldKey: string) => {
-
-    if (!oldKey.startsWith("profiles/")) {
-        throw new AppError("Invalid delete target.");
-    }
 
     await s3Client.send(new DeleteObjectCommand({
         Bucket: env.AWS_S3_BUCKET,

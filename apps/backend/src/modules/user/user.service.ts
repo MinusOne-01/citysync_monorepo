@@ -7,6 +7,7 @@ import { env } from "../../shared/env";
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;
 
+
 export type NewUserRecord = {
     authAccountId: string;
     username: string;

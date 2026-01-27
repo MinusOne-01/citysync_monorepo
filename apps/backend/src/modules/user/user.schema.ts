@@ -17,7 +17,7 @@ export const userParamsSchema = z.object({
 })
 
 export const userProfileUploadSchema = z.object({
-  fileType: z.string()
+  fileType: z.enum(["image/jpeg", "image/png", "image/webp"]),
 })
 
 export const profileUploadCompleteSchema = z.object({

@@ -53,7 +53,7 @@ class UserRepositoryImpl implements UserRepository {
         });
 
         if (oldKey && oldKey !== updatedRecord.profileImageKey) {
-            try{
+            try{        
                 await deleteS3Object(oldKey);
             } catch (err) {
                 // log the error but don't stop the request 
