@@ -8,11 +8,6 @@ export interface AuthenticatedRequest extends Request {
   }
 }
 
-/**
- * 
- * 
- */
-
 export function authMiddleware(
   req: AuthenticatedRequest,
   res: Response,

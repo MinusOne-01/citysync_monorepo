@@ -53,10 +53,17 @@ model AuthRefreshToken {
 
 model User {
   id              String   @id @default(uuid())
+
   authAccountId   String   @unique
   username        String   @unique
   email           String   @unique
+
   displayName     String?
+
+  latitude        Float?
+  longitude       Float?
+  city            String?
+
   profileImageKey String?
   createdAt       DateTime @default(now())
 
@@ -76,12 +83,21 @@ model User {
 
 model Meetup {
   id               String   @id @default(uuid())
+
   organizerId      String
   title            String
   description      String?
   startTime        DateTime
   capacity         Int?
   status           MeetupStatus
+
+  latitude         Float
+  longitude        Float
+
+  city             String?
+  area             String?
+  placeName        String?
+
   meetupImageKey   String
   createdAt        DateTime @default(now())
 
@@ -108,11 +124,12 @@ enum MeetupStatus {
 ////////////////////
 
 model Participation {
-  id         String               @id @default(uuid())
-  meetupId  String
-  userId    String
-  status    ParticipationStatus
-  createdAt DateTime             @default(now())
+  id                String               @id @default(uuid())
+  meetupId          String
+  userId            String
+  usernameSnapshot  String
+  status            ParticipationStatus
+  createdAt         DateTime             @default(now())
 
   meetup    Meetup @relation(fields: [meetupId], references: [id])
   user      User   @relation(fields: [userId], references: [id])
@@ -126,6 +143,29 @@ model Participation {
 enum ParticipationStatus {
   REQUESTED
   CONFIRMED
-  WAITLISTED
   CANCELLED
+}
+
+model UserMeetupHistory {
+  userId       String
+  meetupId     String
+  role         UserRole
+  joinedAt     DateTime
+  meetupDate   DateTime
+  
+  latitude         Float
+  longitude        Float
+  city             String?
+  area             String?
+  placeName        String?
+
+  meetupImageUrl   String
+
+  @@id([userId, meetupId])
+  @@index([userId, meetupDate(sort: Desc)])
+}
+
+enum UserRole {
+  CREATOR
+  PARTICIPANT
 }

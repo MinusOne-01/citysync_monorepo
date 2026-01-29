@@ -5,6 +5,13 @@ export const CreateMeetupSchema = z.object({
   description: z.string().optional(),
   startTime: z.coerce.date(),
   capacity: z.number().int().positive().optional(),
+
+  longitude: z.number().min(-180).max(180),
+  latitude: z.number().min(-90).max(90),
+  city: z.string().optional(),
+  area: z.string().optional(),
+  placeName: z.string().optional(),
+
   meetupImageKey: z.string(),
 })
 

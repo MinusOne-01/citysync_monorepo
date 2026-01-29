@@ -12,6 +12,11 @@ export interface MeetupRecord {
   status: MeetupStatus
   createdAt: Date
   meetupImageKey: string
+  longitude: number
+  latitude: number
+  city: string | null
+  area: string | null
+  placeName: string | null
 }
 
 
@@ -58,6 +63,11 @@ export class meetupRepoImpl implements MeetupRepository {
         startTime: input.startTime,
         capacity: input.capacity,
         status: "DRAFT",
+        longitude: input.longitude,
+        latitude: input.latitude,
+        city: input.city || null,
+        area: input.area || null,
+        placeName: input.placeName || null,
         meetupImageKey: input.meetupImageKey
       }
     })
@@ -71,6 +81,9 @@ export class meetupRepoImpl implements MeetupRepository {
     const record = await prisma.meetup.findUnique({
       where: { id: meetupId, status: "PUBLISHED" }
     })
+    if(!record) {
+      return null
+    }
     return record
   }
 

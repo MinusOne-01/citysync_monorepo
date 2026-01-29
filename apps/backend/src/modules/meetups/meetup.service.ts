@@ -20,6 +20,11 @@ export type CreateMeetupInput = {
   description?: string
   startTime: Date
   capacity?: number
+  longitude: number
+  latitude: number
+  city?: string
+  area?: string
+  placeName?: string
   meetupImageKey: string
 }
 
@@ -37,11 +42,17 @@ export type SignedUrlResponse = {
 }
 
 export type FindMeetupResponse = {
+  organizerId: string
   title: string
   description: string | null
   startTime: Date
   capacity: number | null
   status: MeetupStatus
+  longitude: number
+  latitude: number
+  city: string | null
+  area: string | null
+  placeName: string | null
   imageUrl: string
   createdAt: Date
 }
@@ -120,11 +131,17 @@ class MeetupServiceImpl implements MeetupService {
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);
     
     const meetupData = {
+      organizerId: meetup.organizerId,
       title: meetup.title,
       description: meetup.description,
       startTime: meetup.startTime,
       capacity: meetup.capacity,
       status: meetup.status,
+      longitude: meetup.longitude,
+      latitude: meetup.latitude,
+      city: meetup.city,
+      area: meetup.area,
+      placeName: meetup.placeName,
       imageUrl,
       createdAt: meetup.createdAt
     }
