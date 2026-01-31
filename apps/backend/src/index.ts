@@ -2,10 +2,12 @@ import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import { globalErrorHandler } from "./shared/middleware/error.middleware"
+
 import { registerAuthRoutes } from "./modules/auth"
 import { registeredUserRoutes } from "./modules/user"
 import { registerMeetupRoutes } from "./modules/meetups"
 import { registerParticipateRoutes } from "./modules/participate"
+import { registerFeedRoutes } from "./modules/feed"
 
 const app = express()
 const router = express.Router()
@@ -25,6 +27,7 @@ registerAuthRoutes(router)
 registeredUserRoutes(router)
 registerMeetupRoutes(router)
 registerParticipateRoutes(router)
+registerFeedRoutes(router)
 
 app.use("/api", router)
 

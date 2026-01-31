@@ -105,7 +105,9 @@ model Meetup {
   participants Participation[]
 
   @@index([organizerId])
-  @@index([status])
+  @@index([status, startsAt])
+  @@index([latitude, longitude])
+
   @@map("meetups")
 }
 
