@@ -123,9 +123,43 @@ class MeetupServiceImpl implements MeetupService {
   }
 
   async findMeetup(meetupId: MeetupId): Promise<FindMeetupResponse> {
+
+    const meetup = await meetupRepo.findById(meetupId);
+
+    if (!meetup || meetup.status !== "PUBLISHED") {
+      throw new AppError("Meetup not found", 404);
+    }
+
+    const imageUrl = this.getPublicURL(meetup.meetupImageKey);
+    
+    const meetupData = {
+      organizerId: meetup.organizerId,
+      title: meetup.title,
+      description: meetup.description,
+      startTime: meetup.startTime,
+      capacity: meetup.capacity,
+      status: meetup.status,
+      longitude: meetup.longitude,
+      latitude: meetup.latitude,
+      city: meetup.city,
+      area: meetup.area,
+      placeName: meetup.placeName,
+      imageUrl,
+      createdAt: meetup.createdAt
+    }
+
+    return meetupData;
+  }
+
+  async meetupCreatorView(meetupId: MeetupId, creatorId: string): Promise<FindMeetupResponse> {
+
     const meetup = await meetupRepo.findById(meetupId);
     if (!meetup) {
       throw new AppError("Meetup not found", 404);
+    }
+    
+    if(meetup.organizerId !== creatorId){
+      throw new AppError("User is not the creator of Meetup", 404);
     }
 
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);

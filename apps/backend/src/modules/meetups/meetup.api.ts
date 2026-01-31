@@ -64,6 +64,27 @@ export function registerMeetupRoutes(router: Router) {
     res.status(200).json({ meetup });
   })
 
+  router.get("/meetups/:meetupId/creator-view", authMiddleware, async (req: AuthenticatedRequest, res) => {
+
+    if (!req.user) {
+      return res.status(401).json({ error: "User context missing" });
+    }
+
+    const parsed = PublishMeetupSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.flatten()
+      })
+    };
+
+    const creatorId = req.user.userId;
+    const meetupId = req.params.meetupId as string;
+    const meetup = await meetupService.meetupCreatorView(meetupId, creatorId);
+
+    res.status(200).json({ meetup });
+  })
+
   router.put("/meetups/:meetupId/publish", authMiddleware, async (req: AuthenticatedRequest, res) => {
 
     if (!req.user) {

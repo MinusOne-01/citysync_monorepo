@@ -1,5 +1,5 @@
 import { participateRepo } from "./participate.repo";
-import { ChangeParticipantStatusInput, ChangeParticipantStatusResponse, GetMeetupParticipantsInput, GetMeetupParticipantsResponse, GetParticipationStatusInput, GetParticipationStatusResponse, JoinMeetupInput, JoinMeetupResponse, LeaveMeetupInput, LeaveMeetupResponse } from "./participate.type";
+import { ChangeParticipantStatusInput, ChangeParticipantStatusResponse, GetMeetupParticipantsInput, GetMeetupParticipantsResponse, GetParticipationStatusInput, GetParticipationStatusResponse, JoinMeetupInput, JoinMeetupResponse, LeaveMeetupInput, LeaveMeetupResponse, GetParticipantHistoryInput, GetParticipantHistoryResponse } from "./participate.type";
 import { meetupService } from "../meetups/meetup.service";
 import { userService } from "../user";
 import { AppError } from "../../shared/errors";
@@ -11,7 +11,7 @@ export interface ParticipateService {
     getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse | null>;
     changeParticipantStatus(input: ChangeParticipantStatusInput): Promise<ChangeParticipantStatusResponse>;
     getParticipationStatus(input: GetParticipationStatusInput): Promise<GetParticipationStatusResponse>;
-
+    getParticipantHistory(input: GetParticipantHistoryInput): Promise<GetParticipantHistoryResponse>;
 }
 
 class ParticipateServiceImpl implements ParticipateService {
@@ -21,7 +21,7 @@ class ParticipateServiceImpl implements ParticipateService {
     }
 
     private async fetchUserDetails(userId: string) {
-        return await userService.findUserbyAuthId(userId);
+        return await userService.findUserbyId(userId);
     }
 
     async joinMeetup(input: JoinMeetupInput): Promise<JoinMeetupResponse> {
@@ -33,7 +33,7 @@ class ParticipateServiceImpl implements ParticipateService {
 
         const participantRecord = await this.fetchUserDetails(input.userId);
         if (!participantRecord) {
-            throw new Error("User not found");
+            throw new Error("User not found: ");
         }
 
         const dbInput = {
@@ -46,7 +46,7 @@ class ParticipateServiceImpl implements ParticipateService {
 
         return {
             success: true,
-            message: "Successfully joined the meetup"
+            message: "Successfully sent join meetup request"
         };
 
     }
@@ -64,6 +64,28 @@ class ParticipateServiceImpl implements ParticipateService {
             success: true,
             message: "Successfully left the meetup"
         };
+    }
+
+    async getParticipationStatus(input: GetParticipationStatusInput): Promise<GetParticipationStatusResponse> {
+
+        const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
+        if (!meetupRecord) {
+            throw new AppError("Meetup not found");
+        }
+
+        const dbInput = {
+            userId: input.userId,
+            meetupId: input.meetupId
+        }
+
+        const data = await participateRepo.fetchParticipantStatus(dbInput);
+
+        if(!data){
+            throw new AppError("Partiticpation not found");
+        }
+
+        return data;
+        
     }
 
     async getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse | null> {
@@ -89,7 +111,7 @@ class ParticipateServiceImpl implements ParticipateService {
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
 
         if(input.creatorId !== meetupRecord.organizerId){
-            throw new AppError("User is not the Meetup organiser")
+            throw new AppError("User dont own this Meetup")
         }
         
         if(meetupRecord.status !== "PUBLISHED"){
@@ -132,6 +154,9 @@ class ParticipateServiceImpl implements ParticipateService {
 
             await participateRepo.cancelParticipantStatus(dbInput)
         }
+        else{
+            throw new AppError("Invalid participation state transition");
+        }
 
         return {
             success: true,
@@ -139,26 +164,10 @@ class ParticipateServiceImpl implements ParticipateService {
         };
 
     }
-    
-    async getParticipationStatus(input: GetParticipationStatusInput): Promise<GetParticipationStatusResponse> {
 
-        const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
-        if (!meetupRecord) {
-            throw new Error("Meetup not found");
-        }
-
-        const dbInput = {
-            userId: input.userId,
-            meetupId: input.meetupId
-        }
-
-        const data = await participateRepo.fetchParticipantStatus(dbInput);
-
-        return data;
-        
+    async getParticipantHistory(input: GetParticipantHistoryInput): Promise<GetParticipantHistoryResponse> {
+        return await participateRepo.fetchParticipantHistory({userId: input.userId});
     }
-
-
 
 }
 

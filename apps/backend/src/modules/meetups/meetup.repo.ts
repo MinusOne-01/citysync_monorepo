@@ -1,5 +1,6 @@
 import { MeetupId, MeetupStatus, CreateMeetupInput } from "./meetup.service"
 import { prisma } from "../../shared/db"
+import { AppError } from "../../shared/errors"
 
 
 export interface MeetupRecord {
@@ -79,7 +80,7 @@ export class meetupRepoImpl implements MeetupRepository {
   ): Promise<MeetupRecord | null>
   {
     const record = await prisma.meetup.findUnique({
-      where: { id: meetupId, status: "PUBLISHED" }
+      where: { id: meetupId }
     })
     if(!record) {
       return null
@@ -104,7 +105,7 @@ export class meetupRepoImpl implements MeetupRepository {
     })
 
     if (result.count === 0) {
-      throw new Error("Update failed: Meetup not found or invalid status transition")
+      throw new AppError("Update failed: Meetup not found or invalid status transition")
     }
   }
 

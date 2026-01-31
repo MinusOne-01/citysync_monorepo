@@ -40,7 +40,8 @@ export type SignedUrlResponse = {
 
 export interface UserService {
     createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
-    findUserbyAuthId(authAccountId: string): Promise<UserRecord | null>;
+    findUserbyId(id: string): Promise<UserRecord | null>;
+    findUserbyAuthId(authId: string): Promise<UserRecord | null>;
     getUserByUsername(username: string): Promise<Partial<UserRecord> | null>;
     updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<Partial<UserRecord>>;
     getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse>;
@@ -65,8 +66,13 @@ class UserServiceImpl implements UserService {
 
     }
 
-    async findUserbyAuthId(authAccountId: string): Promise<UserRecord | null> {
-        const user =  await userRepo.findByAuthId(authAccountId);
+    async findUserbyId(id: string): Promise<UserRecord | null> {
+        const user =  await userRepo.findById(id);
+        return user;
+    }
+
+    async findUserbyAuthId(authId: string): Promise<UserRecord | null> {
+        const user =  await userRepo.findByAuthId(authId);
         return user;
     }
 

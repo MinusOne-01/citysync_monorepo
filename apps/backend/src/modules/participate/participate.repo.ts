@@ -1,6 +1,6 @@
-import { ParticipationStatus } from "@prisma/client";
 import { prisma } from "../../shared/db";
-import { CreateParticipationInput, CreateParticipationResponse, DeleteParticipationInput, DeleteParticipationResponse, FetchMeetupParticipantsInput, FetchMeetupParticipantsResponse, ParticipationRole, ApproveParticipantStatusInput, ApproveParticipantStatusResponse, CancelParticipantStatusInput, CancelParticipantStatusResponse, FetchParticipantStatusResponse, FetchParticipantStatusInput } from "./participate.type";
+import { CreateParticipationInput, CreateParticipationResponse, DeleteParticipationInput, DeleteParticipationResponse, FetchMeetupParticipantsInput, FetchMeetupParticipantsResponse, ParticipationRole, ApproveParticipantStatusInput, ApproveParticipantStatusResponse, CancelParticipantStatusInput, CancelParticipantStatusResponse, FetchParticipantStatusResponse, FetchParticipantStatusInput, FetchParticipantHistoryInput, FetchParticipantHistoryResponse } from "./participate.type";
+import { AppError } from "../../shared/errors";
 
 
 export interface ParticipateRepository {
@@ -9,7 +9,8 @@ export interface ParticipateRepository {
     fetchMeetupParticipants(input: FetchMeetupParticipantsInput): Promise<FetchMeetupParticipantsResponse | null>;
     approveParticipantStatus(input: ApproveParticipantStatusInput): Promise<ApproveParticipantStatusResponse>;
     cancelParticipantStatus(input: CancelParticipantStatusInput): Promise<CancelParticipantStatusResponse>;
-    fetchParticipantStatus(input: FetchParticipantStatusInput): Promise<FetchParticipantStatusResponse>;
+    fetchParticipantStatus(input: FetchParticipantStatusInput): Promise<FetchParticipantStatusResponse | null>;
+    fetchParticipantHistory(input: FetchParticipantHistoryInput): Promise<FetchParticipantHistoryResponse | null>;
 
 }
 
@@ -19,7 +20,7 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
         await prisma.participation.upsert({
             where: {
-                userId_meetupId: {
+                meetupId_userId: {
                     userId: input.userId,
                     meetupId: input.meetupId
                 }
@@ -36,24 +37,21 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
     }
 
     async deleteParticipation(input: DeleteParticipationInput): Promise<DeleteParticipationResponse> {
+
         await prisma.$transaction(async (tx) => {
 
-            await tx.participation.delete({
+            await tx.participation.deleteMany({
                 where: {
-                    userId_meetupId: {
-                        userId: input.userId,
-                        meetupId: input.meetupId,
-                    }
-                }
-            })
+                    userId: input.userId,
+                    meetupId: input.meetupId,
+                },
+            });
 
-            await tx.userMeetupHistory.delete({
+            await tx.userMeetupHistory.deleteMany({
                 where: {
-                    userId_meetupId: {
-                        userId: input.userId,
-                        meetupId: input.meetupId,
-                    }
-                }
+                    userId: input.userId,
+                    meetupId: input.meetupId,
+                },
             });
         });
 
@@ -81,30 +79,41 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
         
         await prisma.$transaction(async (tx) => {
 
-            const participate = await tx.participation.updateMany({
+            const record = await tx.participation.findUnique({
                 where: {
-                    userId: input.userId,
-                    meetupId: input.meetupId,
-                    status: "REQUESTED"
+                    meetupId_userId: {
+                        userId: input.userId,
+                        meetupId: input.meetupId,
+                    }
+                }
+            });
+
+            if (!record || record.status !== "REQUESTED") {
+                throw new AppError("Invalid participation state transition");
+            }
+
+            await tx.participation.update({
+                where: {
+                    meetupId_userId: {
+                        userId: input.userId,
+                        meetupId: input.meetupId,
+                    }
                 },
                 data: { status: "CONFIRMED" }
             });
-
-            if (participate.count !== 1) {
-                throw new Error("Invalid participation state transition");
-            }
 
             await tx.userMeetupHistory.create({
                 data: {
                     userId: input.userId,
                     meetupId: input.meetupId,
                     role: input.role as ParticipationRole,
+                    joinedAt: record.createdAt,
                     meetupDate: input.meetupDate,
                     longitude: input.longitude,
                     latitude: input.latitude,
                     meetupImageUrl: input.meetupImageUrl,
                 },
-            }); 
+            });
         });
 
     }
@@ -136,19 +145,37 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
     }
 
-    async fetchParticipantStatus(input: FetchParticipantStatusInput): Promise<FetchParticipantStatusResponse> {
+    async fetchParticipantStatus(input: FetchParticipantStatusInput): Promise<FetchParticipantStatusResponse | null> {
 
-        const record = await prisma.participation.findMany({
+        const records = await prisma.participation.findMany({
             where: {
-                userId_meetupId: {
+ 
                     userId: input.userId,
                     meetupId: input.meetupId,
-                }
-            }
-        })
+ 
+            },
+        });
+
+        if(records.length === 0) return null;
+        const record = records[0];
 
         return { status: record.status, createdAt: record.createdAt };
 
+    }
+
+    async fetchParticipantHistory(input: FetchParticipantHistoryInput): Promise<FetchParticipantHistoryResponse> {
+
+        const records = await prisma.userMeetupHistory.findMany({
+            where: {
+                userId: input.userId,
+            },
+            orderBy: {
+                meetupDate: 'desc', 
+            },
+        });
+
+        return records;
+        
     }
     
 }    

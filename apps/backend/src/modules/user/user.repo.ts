@@ -5,7 +5,7 @@ import { deleteS3Object } from "../../shared/s3.service";
 
 export interface UserRepository {
     createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
-    findByAuthId(authAccountId: string): Promise<UserRecord | null>;
+    findById(id: string): Promise<UserRecord | null>;
     findByUsername(username: string): Promise<UserRecord | null>;
     updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<UserRecord>;
 }
@@ -24,9 +24,16 @@ class UserRepositoryImpl implements UserRepository {
         return newUser;
     }
 
-    async findByAuthId(authAccountId: string): Promise<UserRecord | null> {
+    async findById(id: string): Promise<UserRecord | null> {
         const record = await prisma.user.findUnique({
-            where: { authAccountId },
+            where: { id },
+        });
+        return record;
+    }
+
+    async findByAuthId(authId: string): Promise<UserRecord | null> {
+        const record = await prisma.user.findUnique({
+            where: { authAccountId: authId },
         });
         return record;
     }

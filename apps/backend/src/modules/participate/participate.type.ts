@@ -8,7 +8,7 @@ export type ParticipationStatus = | "REQUESTED" | "CONFIRMED" | "CANCELLED";
 
 export type Participant = {
     userId: string;
-    username: string;
+    usernameSnapshot: string;
     status: ParticipationStatus;
 };
 
@@ -60,6 +60,24 @@ export type GetParticipationStatusResponse = {
     status: ParticipationStatus
     createdAt: Date
 }
+
+export type GetParticipantHistoryInput = {
+    userId: string
+}
+
+export type GetParticipantHistoryResponse = {
+    userId: string
+    meetupId: string
+    role: string
+    joinedAt: Date
+    meetupDate: Date
+    longitude: number
+    latitude: number
+    city: string | null
+    area: string | null
+    placeName: string | null
+    meetupImageUrl: string
+}[]
 
 
 
@@ -117,6 +135,25 @@ export type FetchParticipantStatusInput = {
 }
 
 export type FetchParticipantStatusResponse = {
-    status: string
-    createdAt: string
+    status: ParticipationStatus
+    createdAt: Date
 }
+
+export type FetchParticipantHistoryInput = {
+    userId: string
+}
+
+export type FetchParticipantHistoryResponse = {
+    userId: string
+    meetupId: string
+    role: string
+    joinedAt: Date
+    meetupDate: Date
+    longitude: number
+    latitude: number
+    city: string | null
+    area: string | null
+    placeName: string | null
+    meetupImageUrl: string
+}[]
+
