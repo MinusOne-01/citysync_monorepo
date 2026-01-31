@@ -1,4 +1,4 @@
-import { prisma } from "../../shared/db"
+import { prisma } from "../../shared/configs/db"
 
 export interface AuthAccountRecord {
   id: string

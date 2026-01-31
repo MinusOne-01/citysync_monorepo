@@ -2,7 +2,7 @@ import { participateRepo } from "./participate.repo";
 import { ChangeParticipantStatusInput, ChangeParticipantStatusResponse, GetMeetupParticipantsInput, GetMeetupParticipantsResponse, GetParticipationStatusInput, GetParticipationStatusResponse, JoinMeetupInput, JoinMeetupResponse, LeaveMeetupInput, LeaveMeetupResponse, GetParticipantHistoryInput, GetParticipantHistoryResponse } from "./participate.type";
 import { meetupService } from "../meetups/meetup.service";
 import { userService } from "../user";
-import { AppError } from "../../shared/errors";
+import { AppError } from "../../shared/configs/errors";
 
 
 export interface ParticipateService {

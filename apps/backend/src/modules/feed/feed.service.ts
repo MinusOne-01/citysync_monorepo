@@ -1,5 +1,7 @@
 import { feedRepo } from "./feed.repo";
 import { BuildMainFeedInput, BuildMainFeedResponse } from "./feed.type";
+import { redis } from "../../shared/configs/redis";
+import { regionKey } from "../../shared/utils/geobucket";
 
 
 export interface FeedService {
@@ -28,20 +30,38 @@ class FeedServiceImpl implements FeedService {
 
     }
 
-    async buildMainFeed(input: BuildMainFeedInput): Promise<BuildMainFeedResponse> {
+    private async computeFeed(input: BuildMainFeedInput): Promise<BuildMainFeedResponse> {
 
         const radiusKm = input.radiusKm ?? 20;
         const limit = input.limit ?? 20;
+        const region = regionKey(input.latitude, input.longitude);
 
-        const latDelta = radiusKm / 111;
-        const lngDelta = radiusKm / (111 * Math.cos(toRad(input.latitude)));
-
-        const candidates = await feedRepo.fetchCandidateMeetups({
-            minLat: input.latitude - latDelta,
-            maxLat: input.latitude + latDelta,
-            minLng: input.longitude - lngDelta,
-            maxLng: input.longitude + lngDelta
+        const hotRows = await feedRepo.fetchRegionHotMeetups({
+            regionKey: region,
+            cursor: input.cursor,
+            limit: limit * 3
         });
+
+        let candidates;
+
+        if (hotRows.length > 0) {
+            const meetupIds = hotRows.map(r => r.meetupId);
+            candidates = await feedRepo.fetchMeetupsByIds({ids: meetupIds});
+        }
+
+        if (!candidates || candidates.length === 0) {
+            const latDelta = radiusKm / 111;
+            const lngDelta = radiusKm / (111 * Math.cos(toRad(input.latitude)));
+
+            candidates = await feedRepo.fetchCandidateMeetups({
+                minLat: input.latitude - latDelta,
+                maxLat: input.latitude + latDelta,
+                minLng: input.longitude - lngDelta,
+                maxLng: input.longitude + lngDelta,
+                limit
+            });
+
+        }
 
         const now = new Date().getTime();
 
@@ -64,10 +84,47 @@ class FeedServiceImpl implements FeedService {
 
         }).filter(m => m.distance <= radiusKm)
             .sort((a, b) => b.score - a.score)
-            .slice(0, limit)
+              .sort((a, b) => b.score - a.score)
 
-        // Sort by score descending
-        return scoredFeed.sort((a, b) => b.score - a.score);
+
+        const page = scoredFeed.slice(0, limit);
+        const last = page[page.length - 1]
+
+        return {
+            items: page,
+            nextCursor: last
+                ? { startTime: last.startTime, meetupId: last.id }
+                : null
+        };
+
+    }
+
+
+    async buildMainFeed(input: BuildMainFeedInput): Promise<BuildMainFeedResponse> {
+
+        const radiusKm = input.radiusKm ?? 20;
+        const limit = input.limit ?? 20;
+
+        const isFirstPage = !input.cursor;
+
+        const cacheKey = isFirstPage
+            ? `feed:v1:${regionKey(input.latitude, input.longitude)}:r=${radiusKm}`
+            : null;
+
+        if (isFirstPage && cacheKey) {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        }
+
+        const result = await this.computeFeed(input);
+
+        if (isFirstPage && cacheKey) {
+            await redis.setex(cacheKey, 45, JSON.stringify(result));
+        }
+
+        return result;
 
     }
 

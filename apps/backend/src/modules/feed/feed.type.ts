@@ -10,6 +10,18 @@ export type FeedRepoResponse = Prisma.MeetupGetPayload<{
   };
 }>;
 
+export type HotRepoResponse = Prisma.RegionHotMeetupGetPayload<{}>;
+
+export type MeetupDetails = Prisma.MeetupGetPayload<{
+    include: {
+    _count: {
+      select: {
+        participants: true;
+      };
+    };
+  };
+}>;
+
 export type MeetupShape = {
     distance: number;
     score: number;
@@ -32,6 +44,12 @@ export type MeetupShape = {
     createdAt: Date;
 }
 
+export type FeedCursor = {
+  startTime: Date;
+  meetupId: string;
+};
+
+
 
 /////////////////////
 /// service types
@@ -42,9 +60,13 @@ export type BuildMainFeedInput = {
    latitude: number
    radiusKm?: number        // default: 20
    limit?: number           // default: 20
+   cursor?: FeedCursor;
 }
 
-export type BuildMainFeedResponse = MeetupShape[]
+export type BuildMainFeedResponse = {
+    items: MeetupShape[]
+    nextCursor: FeedCursor | null
+}
 
 
 /////////////////////
@@ -56,6 +78,26 @@ export type FetchCandidateMeetupsInput = {
     maxLat: number
     minLng: number
     maxLng: number
+    cursor?: FeedCursor;
+    limit: number
 }
 
 export type FetchCandidateMeetupsResponse = FeedRepoResponse[]
+
+export type FetchRegionHotMeetupInput = {
+    regionKey: string;
+    cursor?: FeedCursor;
+    limit: number;
+}
+
+export type FetchRegionHotMeetupResponse = HotRepoResponse[]
+
+export type FetchMeetupbyIdInput = {
+    ids: string[]
+}
+
+export type FetchMeetupbyIdResponse = MeetupDetails[]
+
+
+
+}

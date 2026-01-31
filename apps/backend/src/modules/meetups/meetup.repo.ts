@@ -1,6 +1,6 @@
 import { MeetupId, MeetupStatus, CreateMeetupInput } from "./meetup.service"
-import { prisma } from "../../shared/db"
-import { AppError } from "../../shared/errors"
+import { prisma } from "../../shared/configs/db"
+import { AppError } from "../../shared/configs/errors"
 
 
 export interface MeetupRecord {

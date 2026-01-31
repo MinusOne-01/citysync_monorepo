@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
-import { JWT_ACCESS_SECRET } from "../../shared/auth"
+import { JWT_ACCESS_SECRET } from "../../shared/configs/auth"
 
 export interface AuthenticatedRequest extends Request {
   user?: {

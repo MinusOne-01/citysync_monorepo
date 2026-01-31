@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client/scripts/default-index.js";
-import { prisma } from "../../shared/db";
+import { prisma } from "../../shared/configs/db";
 import { NewUserRecord, UserRecord, UserUpdateRecord } from "./user.service";
-import { deleteS3Object } from "../../shared/s3.service";
+import { deleteS3Object } from "../../shared/configs/s3.service";
 
 export interface UserRepository {
     createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;

@@ -100,12 +100,13 @@ model Meetup {
 
   meetupImageKey   String
   createdAt        DateTime @default(now())
-
+  
+  hotRegions  RegionHotMeetup[]
   organizer   User            @relation(fields: [organizerId], references: [id])
   participants Participation[]
 
   @@index([organizerId])
-  @@index([status, startsAt])
+  @@index([status, startTime])
   @@index([latitude, longitude])
 
   @@map("meetups")
@@ -171,3 +172,25 @@ enum UserRole {
   CREATOR
   PARTICIPANT
 }
+
+
+
+////////////////////
+// FEED
+////////////////////
+
+model RegionHotMeetup {
+  regionKey       String
+  meetupId        String
+  popularityScore Float
+  startsAt        DateTime
+  updatedAt       DateTime @updatedAt
+
+  meetup          Meetup @relation(fields: [meetupId], references: [id])
+
+  @@id([regionKey, meetupId])
+  @@index([regionKey, startsAt])
+  @@map("region_hot_meetups")
+}
+
+

@@ -1,6 +1,6 @@
-import { prisma } from "../../shared/db";
+import { prisma } from "../../shared/configs/db";
 import { CreateParticipationInput, CreateParticipationResponse, DeleteParticipationInput, DeleteParticipationResponse, FetchMeetupParticipantsInput, FetchMeetupParticipantsResponse, ParticipationRole, ApproveParticipantStatusInput, ApproveParticipantStatusResponse, CancelParticipantStatusInput, CancelParticipantStatusResponse, FetchParticipantStatusResponse, FetchParticipantStatusInput, FetchParticipantHistoryInput, FetchParticipantHistoryResponse } from "./participate.type";
-import { AppError } from "../../shared/errors";
+import { AppError } from "../../shared/configs/errors";
 
 
 export interface ParticipateRepository {

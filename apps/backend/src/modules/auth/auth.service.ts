@@ -2,16 +2,16 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { authRepo } from "./auth.repo"
 import { userService } from "../user/user.service"
-import { prisma } from "../../shared/db"
+import { prisma } from "../../shared/configs/db"
 import { Prisma } from "@prisma/client"
 import {
   JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   ACCESS_TOKEN_TTL,
   REFRESH_TOKEN_TTL_DAYS
-} from "../../shared/auth"
+} from "../../shared/configs/auth"
 import { email } from "zod"
-import { AppError } from "../../shared/errors"
+import { AppError } from "../../shared/configs/errors"
 
 
 

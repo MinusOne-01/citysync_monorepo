@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client/scripts/default-index.js";
 import { userRepo } from "./user.repo";
-import { AppError } from "../../shared/errors";
-import { getPresignedUploadUrl } from "../../shared/s3.service";
-import { env } from "../../shared/env";
+import { AppError } from "../../shared/configs/errors";
+import { getPresignedUploadUrl } from "../../shared/configs/s3.service";
+import { env } from "../../shared/configs/env";
 
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;

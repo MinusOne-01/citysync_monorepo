@@ -1,7 +1,7 @@
-import { AppError } from "../../shared/errors"
-import { getPresignedUploadUrl } from "../../shared/s3.service"
+import { AppError } from "../../shared/configs/errors"
+import { getPresignedUploadUrl } from "../../shared/configs/s3.service"
 import { meetupRepo } from "./meetup.repo"
-import { env } from "../../shared/env";
+import { env } from "../../shared/configs/env";
 import ca from "zod/v4/locales/ca.js";
 
 const BUCKET = env.AWS_S3_BUCKET!;
