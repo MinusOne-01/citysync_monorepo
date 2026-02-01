@@ -42,6 +42,7 @@ export type SignedUrlResponse = {
 }
 
 export type FindMeetupResponse = {
+  id: string
   organizerId: string
   title: string
   description: string | null
@@ -133,6 +134,7 @@ class MeetupServiceImpl implements MeetupService {
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);
     
     const meetupData = {
+      id: meetup.id,
       organizerId: meetup.organizerId,
       title: meetup.title,
       description: meetup.description,
@@ -165,6 +167,7 @@ class MeetupServiceImpl implements MeetupService {
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);
     
     const meetupData = {
+      id: meetup.id,
       organizerId: meetup.organizerId,
       title: meetup.title,
       description: meetup.description,

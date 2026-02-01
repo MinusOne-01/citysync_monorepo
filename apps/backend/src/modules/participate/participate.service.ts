@@ -3,6 +3,7 @@ import { ChangeParticipantStatusInput, ChangeParticipantStatusResponse, GetMeetu
 import { meetupService } from "../meetups/meetup.service";
 import { userService } from "../user";
 import { AppError } from "../../shared/configs/errors";
+import { publishNotificationEvent } from "../../shared/utils/noti.producer";
 
 
 export interface ParticipateService {
@@ -43,6 +44,18 @@ class ParticipateServiceImpl implements ParticipateService {
         }
 
         await participateRepo.createParticipation(dbInput);
+
+        await publishNotificationEvent({
+            type: "JOIN_REQUEST",
+            payload: {
+                organizerId: meetupRecord.organizerId,
+                meetupId: meetupRecord.id,
+                participantId: participantRecord.id,
+                participantName:
+                    participantRecord.displayName ??
+                    participantRecord.username
+            }
+        });
 
         return {
             success: true,
@@ -142,6 +155,15 @@ class ParticipateServiceImpl implements ParticipateService {
             }
 
             await participateRepo.approveParticipantStatus(dbInput)
+
+            await publishNotificationEvent({
+                type: "PARTICIPANT_APPROVED",
+                payload: {
+                    participantId: participantRecord.id,
+                    meetupId: meetupRecord.id,
+                    meetupName: meetupRecord.title
+                }
+            });
 
         }
         else if(input.newStatus === "CANCELLED"){

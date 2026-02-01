@@ -194,3 +194,29 @@ model RegionHotMeetup {
 }
 
 
+
+////////////////////
+// NOTIFICTIONS
+////////////////////
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      NotificationType
+  data      Json
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  JOIN_REQUEST
+  PARTICIPANT_APPROVED
+  PARTICIPANT_REJECTED
+  MEETUP_CANCELLED
+  MEETUP_UPDATED
+}
+
+
