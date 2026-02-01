@@ -8,6 +8,7 @@ import { registeredUserRoutes } from "./modules/user"
 import { registerMeetupRoutes } from "./modules/meetups"
 import { registerParticipateRoutes } from "./modules/participate"
 import { registerFeedRoutes } from "./modules/feed"
+import { registerNotificationsRoutes } from "./modules/notifications"
 
 const app = express()
 const router = express.Router()
@@ -28,6 +29,7 @@ registeredUserRoutes(router)
 registerMeetupRoutes(router)
 registerParticipateRoutes(router)
 registerFeedRoutes(router)
+registerNotificationsRoutes(router)
 
 app.use("/api", router)
 

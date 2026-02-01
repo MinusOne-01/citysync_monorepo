@@ -1,0 +1,1 @@
+export { registerNotificationsRoutes } from "./noti.api"

@@ -156,15 +156,6 @@ class ParticipateServiceImpl implements ParticipateService {
 
             await participateRepo.approveParticipantStatus(dbInput)
 
-            await publishNotificationEvent({
-                type: "PARTICIPANT_APPROVED",
-                payload: {
-                    participantId: participantRecord.id,
-                    meetupId: meetupRecord.id,
-                    meetupName: meetupRecord.title
-                }
-            });
-
         }
         else if(input.newStatus === "CANCELLED"){
 
@@ -179,6 +170,16 @@ class ParticipateServiceImpl implements ParticipateService {
         else{
             throw new AppError("Invalid participation state transition");
         }
+
+        await publishNotificationEvent({
+            type: "PARTICIPANT_STATUS_UPDATE",
+            payload: {
+                participantId: input.participantId,
+                meetupId: meetupRecord.id,
+                meetupName: meetupRecord.title,
+                status: input.newStatus
+            }
+        });
 
         return {
             success: true,

@@ -1,5 +1,6 @@
 import { MeetupId, MeetupStatus, CreateMeetupInput } from "./meetup.service"
 import { prisma } from "../../shared/configs/db"
+import { Prisma } from "@prisma/client";
 import { AppError } from "../../shared/configs/errors"
 
 
@@ -20,7 +21,7 @@ export interface MeetupRecord {
   placeName: string | null
 }
 
-
+export type UpdateResponse = Prisma.MeetupGetPayload<{}>;
 
 export interface MeetupRepository {
   insert(
@@ -41,7 +42,7 @@ export interface MeetupRepository {
     meetupId: MeetupId,
     organizerId: string,
     data: Partial<CreateMeetupInput>
-  ): Promise<void>
+  ): Promise<UpdateResponse>
 
 }
 
@@ -113,9 +114,9 @@ export class meetupRepoImpl implements MeetupRepository {
     meetupId: MeetupId,
     organizerId: string,
     data: Partial<CreateMeetupInput>
-  ): Promise<void>
+  ): Promise<UpdateResponse>
   {
-    await prisma.meetup.update({
+    return await prisma.meetup.update({
       where: {
         id: meetupId,
         organizerId,

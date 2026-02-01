@@ -10,10 +10,19 @@ export type NotificationEvent =
       };
     }
   | {
-      type: "PARTICIPANT_APPROVED";
+      type: "PARTICIPANT_STATUS_UPDATE";
       payload: {
         participantId: string;
         meetupId: string;
         meetupName: string;
+        status: string
       };
-    };
+    }
+  | {
+      type: "MEETUP_UPDATED";
+      payload: {
+        meetupId: string;
+        meetupName: string;
+        startTime: Date
+      };
+    };  

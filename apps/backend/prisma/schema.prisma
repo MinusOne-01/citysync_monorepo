@@ -196,7 +196,7 @@ model RegionHotMeetup {
 
 
 ////////////////////
-// NOTIFICTIONS
+// NOTIFICTAIONS
 ////////////////////
 
 model Notification {
@@ -213,8 +213,7 @@ model Notification {
 
 enum NotificationType {
   JOIN_REQUEST
-  PARTICIPANT_APPROVED
-  PARTICIPANT_REJECTED
+  PARTICIPANT_STATUS_UPDATE
   MEETUP_CANCELLED
   MEETUP_UPDATED
 }

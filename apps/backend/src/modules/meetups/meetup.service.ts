@@ -2,7 +2,7 @@ import { AppError } from "../../shared/configs/errors"
 import { getPresignedUploadUrl } from "../../shared/configs/s3.service"
 import { meetupRepo } from "./meetup.repo"
 import { env } from "../../shared/configs/env";
-import ca from "zod/v4/locales/ca.js";
+import { publishNotificationEvent } from "../../shared/utils/noti.producer";
 
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;
@@ -201,7 +201,18 @@ class MeetupServiceImpl implements MeetupService {
     if (input.startTime)
        this.validateStartTime(input.startTime);
     try{
-       await meetupRepo.editMeetupDetails(meetupId, organizerId, input); 
+       const meetupRecord = await meetupRepo.editMeetupDetails(meetupId, organizerId, input); 
+
+       if(input.startTime){
+         await publishNotificationEvent({
+           type: "MEETUP_UPDATED",
+           payload: {
+             meetupId: meetupRecord.id,
+             meetupName: meetupRecord.title,
+             startTime: meetupRecord.startTime
+           }
+         });
+       }
     } 
     catch(err){
       throw new AppError("Meetup cannot be updated in its current status");
