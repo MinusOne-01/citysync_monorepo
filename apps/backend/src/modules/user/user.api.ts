@@ -5,23 +5,21 @@ import { createUserSchema, userUploadCompleteSchema, updateUserSchema, userParam
 
 export function registeredUserRoutes(router: Router) {
 
-  router.get("/user/:username", async (req, res) => {
-
-    const parsed = userParamsSchema.safeParse(req.params);
-
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() })
-    };
-
-    const username = req.params.username as string;
-    const userAcc =  await userService.getUserByUsername(username);
-    
-    if (!userAcc) {
-      return res.status(404).json({ error: "User not found" });
+  router.get("/user/me", authMiddleware, async (req: AuthenticatedRequest, res) => {
+     
+    if (!req.user) {
+      return res.status(401).json({ error: "User context missing" });
     }
-    return res.status(200).json({ user: userAcc });
 
-  }); 
+    console.log("Request recieved-> ")
+
+    const userId = req.user.userId;
+    console.log("UserId-> ", userId)
+    const User = await userService.findUserbyId(userId);
+    console.log("UserIinfo-> ", User)
+    return res.status(200).json(User);
+
+  });
   
 
   router.put("/user/update", authMiddleware, async (req: AuthenticatedRequest, res) => {
@@ -80,6 +78,25 @@ export function registeredUserRoutes(router: Router) {
     return res.status(200).json({ user: updatedUser });
 
   });
+
+  router.get("/user/:username", async (req, res) => {
+    
+    console.log(req)
+    const parsed = userParamsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.flatten() })
+    };
+
+    const username = req.params.username as string;
+    const userAcc =  await userService.getUserByUsername(username);
+    
+    if (!userAcc) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json({ user: userAcc });
+
+  }); 
 
 }
 

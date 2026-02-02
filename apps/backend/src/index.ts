@@ -2,6 +2,7 @@ import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import { globalErrorHandler } from "./shared/middleware/error.middleware"
+import cookieParser from "cookie-parser"
 
 import { registerAuthRoutes } from "./modules/auth"
 import { registeredUserRoutes } from "./modules/user"
@@ -21,6 +22,7 @@ app.use(
 )
 
 app.use(express.json())
+app.use(cookieParser());
 
 
 

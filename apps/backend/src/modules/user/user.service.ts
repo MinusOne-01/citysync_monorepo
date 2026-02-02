@@ -3,6 +3,7 @@ import { userRepo } from "./user.repo";
 import { AppError } from "../../shared/configs/errors";
 import { getPresignedUploadUrl } from "../../shared/configs/s3.service";
 import { env } from "../../shared/configs/env";
+import { UserDTO } from "@shared/types/user"
 
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;
@@ -40,9 +41,9 @@ export type SignedUrlResponse = {
 
 export interface UserService {
     createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
-    findUserbyId(id: string): Promise<UserRecord | null>;
+    findUserbyId(id: string): Promise<UserDTO | null>;
     findUserbyAuthId(authId: string): Promise<UserRecord | null>;
-    getUserByUsername(username: string): Promise<Partial<UserRecord> | null>;
+    getUserByUsername(username: string): Promise<UserDTO | null>;
     updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<Partial<UserRecord>>;
     getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse>;
 }
@@ -66,9 +67,21 @@ class UserServiceImpl implements UserService {
 
     }
 
-    async findUserbyId(id: string): Promise<UserRecord | null> {
+    async findUserbyId(id: string): Promise<UserDTO | null> {
+
         const user =  await userRepo.findById(id);
-        return user;
+
+        if(!user) return null;
+
+        const userProfile = {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            avatarUrl: user.profileImageKey ? this.getPublicURL(user.profileImageKey) : null
+        }
+
+        return userProfile;
+
     }
 
     async findUserbyAuthId(authId: string): Promise<UserRecord | null> {
@@ -76,17 +89,17 @@ class UserServiceImpl implements UserService {
         return user;
     }
 
-    async getUserByUsername(username: string): Promise<Partial<UserRecord> | null> {
+    async getUserByUsername(username: string): Promise<UserDTO | null> {
 
         let user = await userRepo.findByUsername(username);
 
         if(!user) return null;
 
         const userProfile = {
+            id: user.id,
             username: user.username,
             displayName: user.displayName,
-            imagePublicURL: user.profileImageKey ? this.getPublicURL(user.profileImageKey) : null,
-            createdAt: user.createdAt
+            avatarUrl: user.profileImageKey ? this.getPublicURL(user.profileImageKey) : null
         }
 
         return userProfile;

@@ -2,15 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDirs": ["src", "../../packages/shared"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    // 1. Tell TS to look in both node_modules and your local types folder
-    "typeRoots": [
-      "../../node_modules/@types", 
-      "./src/shared/types"
-    ]
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../packages/shared/*"]
+    }
   },
-  // 2. Ensure everything in src is being watched
-  "include": ["src/**/*", "src/shared/types/**/*"]
+  "include": ["src/**/*", "../../packages/shared/**/*", "../frontend/src/modules/auth/fetchWithAuth.ts"]
 }
