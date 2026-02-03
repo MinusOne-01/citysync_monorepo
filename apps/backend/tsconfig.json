@@ -10,5 +10,5 @@
       "@shared/*": ["../../packages/shared/*"]
     }
   },
-  "include": ["src/**/*", "../../packages/shared/**/*", "../frontend/src/modules/auth/fetchWithAuth.ts"]
+  "include": ["src/**/*", "../../packages/shared/**/*", "../frontend/src/shared/utils/fetchWithAuth.ts"]
 }

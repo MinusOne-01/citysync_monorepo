@@ -26,10 +26,6 @@ export const MeetupUploadUrlSchema = z.object({
   fileType: z.enum(["image/jpeg", "image/png", "image/webp"]),
 })
 
-export const FindMeetupSchema = z.object({
-  meetupId: z.uuid()
-})
-
-export const PublishMeetupSchema = z.object({
+export const ValidateMeetupIdSchema = z.object({
   meetupId: z.uuid()
 })

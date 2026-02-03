@@ -77,7 +77,7 @@ export interface MeetupService {
   editMeetup(
     meetupId: MeetupId,
     organizerId: string,
-    input: CreateMeetupInput
+    input: EditMeetupInput
   ): Promise<void>
 
   cancelMeetup(
@@ -198,25 +198,21 @@ class MeetupServiceImpl implements MeetupService {
     organizerId: string,
     input: EditMeetupInput
   ) {
-    if (input.startTime)
-       this.validateStartTime(input.startTime);
-    try{
-       const meetupRecord = await meetupRepo.editMeetupDetails(meetupId, organizerId, input); 
+    
+    if (input.startTime) this.validateStartTime(input.startTime)
 
-       if(input.startTime){
-         await publishNotificationEvent({
-           type: "MEETUP_UPDATED",
-           payload: {
-             meetupId: meetupRecord.id,
-             meetupName: meetupRecord.title,
-             startTime: meetupRecord.startTime
-           }
-         });
-       }
-    } 
-    catch(err){
-      throw new AppError("Meetup cannot be updated in its current status");
-    } 
+    const meetupRecord = await meetupRepo.editMeetupDetails(meetupId, organizerId, input)
+
+    if (input.startTime) {
+      await publishNotificationEvent({
+        type: "MEETUP_UPDATED",
+        payload: {
+          meetupId: meetupRecord.id,
+          meetupName: meetupRecord.title,
+          startTime: meetupRecord.startTime
+        }
+      })
+    }
     
   }
 

@@ -1,18 +1,18 @@
-import { Prisma } from "@prisma/client/scripts/default-index.js";
+import { Prisma } from "@prisma/client"
 import { prisma } from "../../shared/configs/db";
-import { NewUserRecord, UserRecord, UserUpdateRecord } from "./user.service";
+import { NewUserInput, UserDbRecord, UserUpdateInput } from "./user.type";
 import { deleteS3Object } from "../../shared/configs/s3.service";
 
 export interface UserRepository {
-    createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
-    findById(id: string): Promise<UserRecord | null>;
-    findByUsername(username: string): Promise<UserRecord | null>;
-    updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<UserRecord>;
+    createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord>;
+    findById(id: string): Promise<UserDbRecord | null>;
+    findByUsername(username: string): Promise<UserDbRecord | null>;
+    updateUser(userId: string, updateData: Partial<UserUpdateInput>): Promise<UserDbRecord>;
 }
 
 class UserRepositoryImpl implements UserRepository {
     
-    async createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord> {
+    async createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord> {
         
         const newUser = await tx.user.create({  
             data: {
@@ -24,21 +24,21 @@ class UserRepositoryImpl implements UserRepository {
         return newUser;
     }
 
-    async findById(id: string): Promise<UserRecord | null> {
+    async findById(id: string): Promise<UserDbRecord | null> {
         const record = await prisma.user.findUnique({
             where: { id },
         });
         return record;
     }
 
-    async findByAuthId(authId: string): Promise<UserRecord | null> {
+    async findByAuthId(authId: string): Promise<UserDbRecord | null> {
         const record = await prisma.user.findUnique({
             where: { authAccountId: authId },
         });
         return record;
     }
 
-    async findByUsername(username: string): Promise<UserRecord | null> {
+    async findByUsername(username: string): Promise<UserDbRecord | null> {
         
         const record = await prisma.user.findUnique({
             where: { username },
@@ -50,7 +50,7 @@ class UserRepositoryImpl implements UserRepository {
         return record;
     }
 
-    async updateUser(userId: string, updateData: UserUpdateRecord): Promise<UserRecord> {
+    async updateUser(userId: string, updateData: UserUpdateInput): Promise<UserDbRecord> {
 
         let oldKey: string | null | undefined = null;
 
@@ -71,7 +71,6 @@ class UserRepositoryImpl implements UserRepository {
             try{        
                 await deleteS3Object(oldKey);
             } catch (err) {
-                // log the error but don't stop the request 
                 console.error("Failed to delete orphaned S3 object:", oldKey, err);
             }
         }    

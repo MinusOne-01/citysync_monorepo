@@ -5,96 +5,117 @@ import { createUserSchema, userUploadCompleteSchema, updateUserSchema, userParam
 
 export function registeredUserRoutes(router: Router) {
 
-  router.get("/user/me", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  router.get("/user/me", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
      
-    if (!req.user) {
-      return res.status(401).json({ error: "User context missing" });
+    try {
+
+      if (!req.user) {
+        return res.status(401).json({ error: "User context missing" })
+      }
+
+      const userId = req.user.userId
+      const user = await userService.findUserbyId(userId)
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" })
+      }
+
+      return res.status(200).json({ user })
+    } 
+    catch (err) {
+      return next(err)
     }
-
-    console.log("Request recieved-> ")
-
-    const userId = req.user.userId;
-    console.log("UserId-> ", userId)
-    const User = await userService.findUserbyId(userId);
-    console.log("UserIinfo-> ", User)
-    return res.status(200).json(User);
 
   });
   
+  router.put("/user/update", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
-  router.put("/user/update", authMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
 
-    if (!req.user) {
-      return res.status(401).json({ error: "User context missing" });
+      if (!req.user) {
+        return res.status(401).json({ error: "User context missing" })
+      }
+
+      const parsed = updateUserSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() })
+      }
+
+      const userId = req.user.userId
+      const updatedUser = await userService.updateUser(userId, parsed.data)
+      return res.status(200).json({ user: updatedUser })
+    } 
+    catch (err) {
+      return next(err)
     }
-
-    const parsed = updateUserSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() })
-    };
-
-    const userId = req.user.userId;
-
-    const updatedUser = await userService.updateUser(userId, parsed.data);
-    return res.status(200).json({ user: updatedUser });
 
   });
 
-  router.post("/user/profile-upload-url", authMiddleware,  async (req: AuthenticatedRequest, res) => {
+  router.post("/user/profile-upload-url", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
 
-    if (!req.user) {
-      return res.status(401).json({ error: "User context missing" });
+    try {
+
+      if (!req.user) {
+        return res.status(401).json({ error: "User context missing" })
+      }
+
+      const parsed = userUploadUrlSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() })
+      }
+
+      const userId = req.user.userId
+      const uploadData = await userService.getProfileUploadUrl(userId, parsed.data.fileType)
+      return res.status(200).json({ uploadData })
+    } 
+    catch (err) {
+      return next(err)
     }
 
-    const parsed = userUploadUrlSchema.safeParse(req.body);
+    });
 
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() })
+  router.put("/user/profile-upload-complete", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
+
+    try {
+
+      if (!req.user) {
+        return res.status(401).json({ error: "User context missing" })
+      }
+
+      const parsed = userUploadCompleteSchema.safeParse(req.body)
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() })
+      }
+
+      const userId = req.user.userId
+      const updatedUser = await userService.updateUser(userId, parsed.data)
+      return res.status(200).json({ user: updatedUser })
+    } 
+    catch (err) {
+      return next(err)
     }
 
-    const userId = req.user.userId;
-    const fileType = parsed.data.fileType;
-    const uploadData = await userService.getProfileUploadUrl(userId, fileType);
-
-    return  res.status(200).json({ uploadData });
   });
 
-  router.put("/user/profile-upload-complete", authMiddleware, async (req: AuthenticatedRequest, res) => {
-
-    if (!req.user) {
-      return res.status(401).json({ error: "User context missing" });
-    }
-
-    const parsed = userUploadCompleteSchema.safeParse(req.body);
-
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() })
-    }
+  router.get("/user/:username", async (req, res, next) => {
     
-    const userId = req.user.userId;
+    try {
 
-    const updatedUser = await userService.updateUser(userId, parsed.data);
-    return res.status(200).json({ user: updatedUser });
+      const parsed = userParamsSchema.safeParse(req.params)
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() })
+      }
 
-  });
+      const userAcc = await userService.getUserByUsername(parsed.data.username)
+      if (!userAcc) {
+        return res.status(404).json({ error: "User not found" })
+      }
 
-  router.get("/user/:username", async (req, res) => {
-    
-    console.log(req)
-    const parsed = userParamsSchema.safeParse(req.params);
-
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() })
-    };
-
-    const username = req.params.username as string;
-    const userAcc =  await userService.getUserByUsername(username);
-    
-    if (!userAcc) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(200).json({ user: userAcc })
+    } 
+    catch (err) {
+      return next(err)
     }
-    return res.status(200).json({ user: userAcc });
 
   }); 
 

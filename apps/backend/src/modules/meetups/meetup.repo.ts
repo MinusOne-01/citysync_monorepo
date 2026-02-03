@@ -116,7 +116,8 @@ export class meetupRepoImpl implements MeetupRepository {
     data: Partial<CreateMeetupInput>
   ): Promise<UpdateResponse>
   {
-    return await prisma.meetup.update({
+    
+    const result = await prisma.meetup.updateMany({
       where: {
         id: meetupId,
         organizerId,
@@ -125,6 +126,20 @@ export class meetupRepoImpl implements MeetupRepository {
       data
     })
 
+    if (result.count === 0) {
+      throw new AppError("Meetup not found or invalid status transition")
+    }
+
+    // return updated record
+    const updated = await prisma.meetup.findUnique({
+      where: { id: meetupId }
+    })
+
+    if (!updated) {
+      throw new AppError("Meetup not found after update")
+    }
+
+    return updated
 
   }
 

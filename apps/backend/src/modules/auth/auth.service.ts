@@ -10,7 +10,6 @@ import {
   ACCESS_TOKEN_TTL,
   REFRESH_TOKEN_TTL_DAYS
 } from "../../shared/configs/auth"
-import { email } from "zod"
 import { AppError } from "../../shared/configs/errors"
 
 
@@ -36,12 +35,6 @@ export interface AuthService {
 }
 
 
-
-
-/**
- * ...
- * ...
- */
 
 export const authService = {
 
@@ -242,25 +235,29 @@ export const authService = {
   },
 
   async logout(refreshToken: string): Promise<void> {
-  const tokens = await prisma.authRefreshToken.findMany({
-    where: { revokedAt: null }
-  })
+   
+    if (!refreshToken) return;
 
-  const matchingToken = await Promise.all(
-    tokens.map(async (token) => {
-      const match = await bcrypt.compare(refreshToken, token.tokenHash)
-      return match ? token : null
+    const tokens = await prisma.authRefreshToken.findMany({
+      where: { revokedAt: null }
     })
-  ).then((res) => res.find(Boolean))
 
-  if (!matchingToken) {
-    return // idempotent logout
-  }
+    const matchingToken = await Promise.all(
+      tokens.map(async (token) => {
+        const match = await bcrypt.compare(refreshToken, token.tokenHash)
+        return match ? token : null
+      })
+    ).then((res) => res.find(Boolean))
 
-  await prisma.authRefreshToken.update({
-    where: { id: matchingToken.id },
-    data: { revokedAt: new Date() }
-  })
+    if (!matchingToken) {
+      return
+    }
+
+    await prisma.authRefreshToken.update({
+      where: { id: matchingToken.id },
+      data: { revokedAt: new Date() }
+    })
+
 }
 
 

@@ -1,7 +1,10 @@
-import type { UserDTO } from "@shared/types/user";
+export type AuthUser = {
+  id: string
+  email: string
+  username: string
+}
 
-export type AuthState =
-  | { status: "idle" }               // not checked yet
-  | { status: "loading" }            // checking / refreshing
-  | { status: "authenticated"; user: UserDTO }
-  | { status: "unauthenticated" };
+export type AuthState = {
+  user: AuthUser | null
+  loading: boolean
+}

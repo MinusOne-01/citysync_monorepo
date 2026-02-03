@@ -1,50 +1,21 @@
-import { Prisma } from "@prisma/client/scripts/default-index.js";
+import { Prisma } from "@prisma/client"
 import { userRepo } from "./user.repo";
 import { AppError } from "../../shared/configs/errors";
 import { getPresignedUploadUrl } from "../../shared/configs/s3.service";
 import { env } from "../../shared/configs/env";
 import { UserDTO } from "@shared/types/user"
+import { NewUserInput, UserUpdateInput, UserDbRecord, SignedUrlResponse } from "./user.type";
 
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;
 
 
-export type NewUserRecord = {
-    authAccountId: string;
-    username: string;
-    email: string;
-}
-
-export type UserRecord = {
-    id: string;
-    authAccountId: string;
-    username: string;
-    email: string;
-    displayName: string | null;
-    createdAt: Date;
-    profileImageKey?: string | null;
-    imagePublicURL?: string | null;
-}
-
-export type UserUpdateRecord = {
-    displayName?: string;
-    email?: string
-    profileImageKey?: string;
-}
-
-export type SignedUrlResponse = {
-  signedUrl: string;
-  key: string;
-  publicUrl: string;
-}
-
-
 export interface UserService {
-    createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord>;
+    createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord>;
     findUserbyId(id: string): Promise<UserDTO | null>;
-    findUserbyAuthId(authId: string): Promise<UserRecord | null>;
+    findUserbyAuthId(authId: string): Promise<UserDbRecord | null>;
     getUserByUsername(username: string): Promise<UserDTO | null>;
-    updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<Partial<UserRecord>>;
+    updateUser(userId: string, updateData: Partial<UserUpdateInput>): Promise<Partial<UserDbRecord>>;
     getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse>;
 }
 
@@ -55,16 +26,28 @@ class UserServiceImpl implements UserService {
         return url;
     }
 
-    async createUser(data: NewUserRecord, tx: Prisma.TransactionClient): Promise<UserRecord> {
+    async createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord> {
+
         try{
-            const newUser = await userRepo.createUser(data, tx);
-            return newUser;
-
+            return await userRepo.createUser(data, tx);
         }
-        catch(err){
-            throw new AppError("Username already taken");
+        catch(err: any){
+             if (err?.code === "P2002") {
+                throw new AppError("Username already taken")
+            }
+            throw err
         }
 
+    }
+
+    async getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse> {
+        
+        if(!fileType.startsWith("image/")){
+            throw new AppError("Invalid file type. Only image files are allowed.");
+        }
+
+        const uploadData = await getPresignedUploadUrl(userId, 'profiles', fileType);
+        return uploadData;
     }
 
     async findUserbyId(id: string): Promise<UserDTO | null> {
@@ -84,7 +67,7 @@ class UserServiceImpl implements UserService {
 
     }
 
-    async findUserbyAuthId(authId: string): Promise<UserRecord | null> {
+    async findUserbyAuthId(authId: string): Promise<UserDbRecord | null> {
         const user =  await userRepo.findByAuthId(authId);
         return user;
     }
@@ -105,7 +88,7 @@ class UserServiceImpl implements UserService {
         return userProfile;
     }   
 
-    async updateUser(userId: string, updateData: Partial<UserUpdateRecord>): Promise<Partial<UserRecord>> {
+    async updateUser(userId: string, updateData: Partial<UserUpdateInput>): Promise<Partial<UserDbRecord>> {
 
         const user = await userRepo.updateUser(userId, updateData);
         
@@ -118,16 +101,6 @@ class UserServiceImpl implements UserService {
         }
 
         return userProfile;
-    }
-
-    async getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse> {
-        
-        if(!fileType.startsWith("image/")){
-            throw new AppError("Invalid file type. Only image files are allowed.");
-        }
-
-        const uploadData = await getPresignedUploadUrl(userId, 'profiles', fileType);
-        return uploadData;
     }
 
 }
