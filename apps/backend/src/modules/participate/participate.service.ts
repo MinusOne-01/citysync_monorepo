@@ -9,7 +9,7 @@ import { publishNotificationEvent } from "../../shared/utils/noti.producer";
 export interface ParticipateService {
     joinMeetup(input: JoinMeetupInput): Promise<JoinMeetupResponse>;
     leaveMeetup(input: LeaveMeetupInput): Promise<LeaveMeetupResponse>;
-    getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse | null>;
+    getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse>;
     changeParticipantStatus(input: ChangeParticipantStatusInput): Promise<ChangeParticipantStatusResponse>;
     getParticipationStatus(input: GetParticipationStatusInput): Promise<GetParticipationStatusResponse>;
     getParticipantHistory(input: GetParticipantHistoryInput): Promise<GetParticipantHistoryResponse>;
@@ -29,12 +29,12 @@ class ParticipateServiceImpl implements ParticipateService {
         
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
         if (!meetupRecord) {
-            throw new Error("Meetup not found");
+            throw new AppError("Meetup not found");
         }
 
         const participantRecord = await this.fetchUserDetails(input.userId);
         if (!participantRecord) {
-            throw new Error("User not found: ");
+            throw new AppError("User not found: ");
         }
 
         const dbInput = {
@@ -94,16 +94,20 @@ class ParticipateServiceImpl implements ParticipateService {
         const data = await participateRepo.fetchParticipantStatus(dbInput);
 
         if(!data){
-            throw new AppError("Partiticpation not found");
+            throw new AppError("Partiticipation not found");
         }
 
         return data;
         
     }
 
-    async getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse | null> {
+    async getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse> {
         
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
+
+        if (!meetupRecord) {
+            throw new AppError("Meetup not found");
+        }
 
         if(input.userId !== meetupRecord.organizerId){
             throw new AppError("User is not the Meetup organiser")
@@ -123,6 +127,10 @@ class ParticipateServiceImpl implements ParticipateService {
         
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
 
+        if (!meetupRecord) {
+            throw new AppError("Meetup not found");
+        }
+
         if(input.creatorId !== meetupRecord.organizerId){
             throw new AppError("User dont own this Meetup")
         }
@@ -135,7 +143,7 @@ class ParticipateServiceImpl implements ParticipateService {
 
             const participantRecord = await this.fetchUserDetails(input.participantId);
             if (!participantRecord) {
-                throw new Error("User not found");
+                throw new AppError("User not found");
             }
 
             let role = "PARTICIPANT";

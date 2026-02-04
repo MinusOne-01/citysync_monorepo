@@ -4,13 +4,14 @@ import { AppError } from "../../shared/configs/errors";
 
 
 export interface ParticipateRepository {
+
     createParticipation(input: CreateParticipationInput): Promise<CreateParticipationResponse>;
     deleteParticipation(input: DeleteParticipationInput): Promise<DeleteParticipationResponse>;
-    fetchMeetupParticipants(input: FetchMeetupParticipantsInput): Promise<FetchMeetupParticipantsResponse | null>;
+    fetchMeetupParticipants(input: FetchMeetupParticipantsInput): Promise<FetchMeetupParticipantsResponse>;
     approveParticipantStatus(input: ApproveParticipantStatusInput): Promise<ApproveParticipantStatusResponse>;
     cancelParticipantStatus(input: CancelParticipantStatusInput): Promise<CancelParticipantStatusResponse>;
     fetchParticipantStatus(input: FetchParticipantStatusInput): Promise<FetchParticipantStatusResponse | null>;
-    fetchParticipantHistory(input: FetchParticipantHistoryInput): Promise<FetchParticipantHistoryResponse | null>;
+    fetchParticipantHistory(input: FetchParticipantHistoryInput): Promise<FetchParticipantHistoryResponse>;
 
 }
 
@@ -57,7 +58,7 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
     }
 
-    async fetchMeetupParticipants(input: FetchMeetupParticipantsInput): Promise<FetchMeetupParticipantsResponse | null> {
+    async fetchMeetupParticipants(input: FetchMeetupParticipantsInput): Promise<FetchMeetupParticipantsResponse> {
         
         const records = await prisma.participation.findMany({
             where: {
@@ -69,8 +70,6 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
                 status: true
             },
         });
-
-        if(!records) return null;
 
         return records;
     }
