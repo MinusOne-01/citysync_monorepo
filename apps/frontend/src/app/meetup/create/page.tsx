@@ -6,14 +6,13 @@ import { meetupApi } from "../../../modules/meetups/meetup.api"
 import { uploadMeetupImage } from "../../../modules/meetups/meetup.upload"
 import { ApiError } from "../../../shared/utils/apiError"
 import { z } from "zod"
+import { geocodeSearch, getBrowserLocation, type GeoResult } from "../../../shared/utils/geocode"
 
 const CreateMeetupClientSchema = z.object({
   title: z.string().min(5),
   description: z.string().optional(),
   startTime: z.string().min(1),
   capacity: z.string().optional(),
-  latitude: z.string().min(1),
-  longitude: z.string().min(1),
   city: z.string().optional(),
   area: z.string().optional(),
   placeName: z.string().optional(),
@@ -28,32 +27,70 @@ export default function CreateMeetupPage() {
   const [description, setDescription] = useState("")
   const [startTime, setStartTime] = useState("")
   const [capacity, setCapacity] = useState<string>("")
-  const [latitude, setLatitude] = useState<string>("")
-  const [longitude, setLongitude] = useState<string>("")
   const [city, setCity] = useState("")
   const [area, setArea] = useState("")
   const [placeName, setPlaceName] = useState("")
   const [imageFile, setImageFile] = useState<File | null>(null)
+
+  const [locationQuery, setLocationQuery] = useState("")
+  const [locationResults, setLocationResults] = useState<GeoResult[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<GeoResult | null>(null)
+  const [searching, setSearching] = useState(false)
+
+  async function onSearchLocation() {
+    setError(null)
+    if (!locationQuery.trim()) {
+      setError("Enter a location to search.")
+      return
+    }
+    setSearching(true)
+    try {
+      const results = await geocodeSearch(locationQuery, 5)
+      setLocationResults(results)
+      if (results.length === 0) setError("No locations found.")
+    } catch {
+      setError("Failed to search location.")
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  async function onUseCurrentLocation() {
+    setError(null)
+    setSearching(true)
+    try {
+      const loc = await getBrowserLocation()
+      setSelectedLocation(loc)
+      setLocationResults([])
+    } catch {
+      setError("Could not access current location.")
+    } finally {
+      setSearching(false)
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
 
     const parsed = CreateMeetupClientSchema.safeParse({
-        title,
-        description: description || undefined,
-        startTime,
-        capacity: capacity || undefined,
-        latitude,
-        longitude,
-        city: city || undefined,
-        area: area || undefined,
-        placeName: placeName || undefined,
+      title,
+      description: description || undefined,
+      startTime,
+      capacity: capacity || undefined,
+      city: city || undefined,
+      area: area || undefined,
+      placeName: placeName || undefined,
     })
 
     if (!parsed.success) {
-        setError("Please fix the form errors before submitting.")
-        return
+      setError("Please fix the form errors before submitting.")
+      return
+    }
+
+    if (!selectedLocation) {
+      setError("Please select a location.")
+      return
     }
 
     if (!imageFile) {
@@ -63,24 +100,22 @@ export default function CreateMeetupPage() {
 
     setLoading(true)
     try {
-      // 1) upload image to S3
       const uploadData = await uploadMeetupImage(imageFile)
 
-      // 2) create meetup
       const res = await meetupApi.create({
         title,
         description: description || undefined,
         startTime: new Date(startTime).toISOString(),
         capacity: capacity ? Number(capacity) : undefined,
-        latitude: Number(latitude),
-        longitude: Number(longitude),
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
         city: city || undefined,
         area: area || undefined,
         placeName: placeName || undefined,
         meetupImageKey: uploadData.key
       })
 
-      router.push(`/meetup/${res.meetupId}`)
+      router.push(`/meetup/${res.meetupId}/edit`)
     } catch (err) {
       if (err instanceof ApiError) setError(err.message)
       else setError("Failed to create meetup")
@@ -136,28 +171,55 @@ export default function CreateMeetupPage() {
         </label>
 
         <label>
-          Latitude
-          <input
-            type="number"
-            step="any"
-            value={latitude}
-            onChange={(e) => setLatitude(e.target.value)}
-            required
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
+          Location search
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              value={locationQuery}
+              onChange={(e) => setLocationQuery(e.target.value)}
+              placeholder="Search address or place"
+              style={{ flex: 1, padding: "10px 12px" }}
+            />
+            <button type="button" onClick={onSearchLocation} disabled={searching}>
+              {searching ? "Searching..." : "Search"}
+            </button>
+            <button type="button" onClick={onUseCurrentLocation} disabled={searching}>
+              Use current
+            </button>
+          </div>
         </label>
 
-        <label>
-          Longitude
-          <input
-            type="number"
-            step="any"
-            value={longitude}
-            onChange={(e) => setLongitude(e.target.value)}
-            required
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
+        {locationResults.length > 0 && (
+          <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 8 }}>
+            {locationResults.map((r, i) => (
+              <button
+                key={`${r.label}-${i}`}
+                type="button"
+                onClick={() => {
+                  setSelectedLocation(r)
+                  setLocationResults([])
+                  setLocationQuery(r.label)
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 10px",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer"
+                }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {selectedLocation && (
+          <div style={{ fontSize: 13, color: "#555" }}>
+            Selected: {selectedLocation.label}
+          </div>
+        )}
 
         <label>
           City
