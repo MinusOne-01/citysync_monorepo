@@ -16,10 +16,13 @@ export type NotiRecord = {
 export type GetUserNotiInput = {
     userId: string
     limit?: number
+    cursor?: string
 }
 
-export type GetUserNotiResponse = NotiRecord[]
-
+export type GetUserNotiResponse = {
+    items: NotiRecord[]
+    nextCursor: string | null
+}
 
 export type MarkIsReadInput = {
     userId: string
@@ -55,9 +58,13 @@ export type NotiDbShape = Prisma.NotificationGetPayload<{}>
 export type FindNotiRecordsInput = {
     userId: string
     limit: number
+    cursor?: string
 }
 
-export type FindNotiRecordsResponse = NotiDbShape[]
+export type FindNotiRecordsResponse = {
+    items: NotiDbShape[]
+    nextCursor: string | null
+}
 
 export type UpdateReadInput = {
     userId: string

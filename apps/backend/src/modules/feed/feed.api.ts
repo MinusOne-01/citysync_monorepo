@@ -4,20 +4,26 @@ import { feedService } from "./feed.service";
 
 export function registerFeedRoutes(router: Router) {
    
-    router.get("/feed", async (req, res) => {
+    router.get("/feed", async (req, res, next) => {
 
-        const parsed = getFeedSchema.safeParse(req.query);
+        try {
+            const parsed = getFeedSchema.safeParse(req.query);
 
-        if (!parsed.success) {
-            return res.status(400).json({
-                error: parsed.error.flatten()
-            })
-        };
+            if (!parsed.success) {
+                return res.status(400).json({
+                    error: parsed.error.flatten()
+                })
+            };
 
-        const meetups = await feedService.buildMainFeed(parsed.data)
+            const meetups = await feedService.buildMainFeed(parsed.data)
 
-        return res.status(200).json(meetups);
+            return res.status(200).json(meetups);
+        }
+        catch (err) {
+            next(err)
+        }
 
     });
     
 }
+

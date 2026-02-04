@@ -12,9 +12,13 @@ class NotificationServiceImpl implements NotificationService {
 
     async getUserNoti(input: GetUserNotiInput): Promise<GetUserNotiResponse> {
         
-        const records = await notiRepo.findNotiRecords({userId: input.userId, limit: input.limit ?? 20})
-        
-        const data = records.map((r) => ({
+        const { items, nextCursor } = await notiRepo.findNotiRecords({
+          userId: input.userId,
+          limit: input.limit ?? 20,
+          cursor: input.cursor
+        });
+
+        const data = items.map((r) => ({
             notiId: r.id,
             type: r.type,
             data: r.data,
@@ -22,17 +26,19 @@ class NotificationServiceImpl implements NotificationService {
             createdAt: r.createdAt
         }));
 
-        return data;
+        return { items: data, nextCursor };
+
     }
 
     async markIsRead(input: MarkIsReadInput): Promise<MarkIsReadResponse> {
         
-        await notiRepo.updateRead({userId: input.userId, notiId: input.recordId})
+        const count = await notiRepo.updateRead({ userId: input.userId, notiId: input.recordId })
 
-        return({
-            status: "Success",
-            message: "Notification marked as Read"
-        })
+        if (count === 0) {
+          return { status: "success", message: "Notification already read or not found" }
+        }
+
+        return { status: "success", message: "Notification marked as read" }
     }
 
     async markIsReadBulk(input: MarkIsReadBulkInput): Promise<MarkIsReadBulkResponse> {

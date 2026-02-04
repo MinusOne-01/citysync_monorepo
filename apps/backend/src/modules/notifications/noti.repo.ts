@@ -5,50 +5,57 @@ import { prisma } from "../../shared/configs/db";
 
 export interface NotificationRepository {
    findNotiRecords(input: FindNotiRecordsInput): Promise<FindNotiRecordsResponse>
-   updateRead(input: UpdateReadInput): Promise<void>
-   updateBulkRead(input: UpdateBulkReadInput): Promise<void>
+   updateRead(input: UpdateReadInput): Promise<number>
+   updateBulkRead(input: UpdateBulkReadInput): Promise<number>
 }
 
 class NotificationRepositoryImpl implements NotificationRepository {
 
     async findNotiRecords(input: FindNotiRecordsInput): Promise<FindNotiRecordsResponse> {
 
-        return await prisma.notification.findMany({
+        const items = await prisma.notification.findMany({
             where: {
                 userId: input.userId
             },
             orderBy: { createdAt: "desc" },
-            take: input.limit
+            take: input.limit,
+            ...(input.cursor
+              ? { skip: 1, cursor: { id: input.cursor } }
+              : {})
         });
+
+        const nextCursor = items.length === input.limit ? items[items.length - 1]?.id ?? null : null;
+
+        return { items, nextCursor };
 
     }
 
-    async updateRead(input: UpdateReadInput): Promise<void> {
+    async updateRead(input: UpdateReadInput): Promise<number> {
 
-        await prisma.notification.updateMany({
+        const result = await prisma.notification.updateMany({
             where: {
                 userId: input.userId,
                 id: input.notiId,
-                isRead: false 
+                isRead: false
             },
-            data: {
-                isRead: true
-            }
+            data: { isRead: true }
         });
+
+        return result.count;
 
     }
 
-    async updateBulkRead(input: UpdateBulkReadInput): Promise<void> {
+    async updateBulkRead(input: UpdateBulkReadInput): Promise<number> {
 
-        await prisma.notification.updateMany({
+        const result = await prisma.notification.updateMany({
             where: {
                 userId: input.userId,
                 isRead: false
             },
-            data: {
-                isRead: true
-            }
+            data: { isRead: true }
         });
+
+        return result.count;
 
     }
 
