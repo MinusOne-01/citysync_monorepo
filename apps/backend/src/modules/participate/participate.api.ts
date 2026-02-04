@@ -2,8 +2,11 @@ import { Router } from "express";
 import { ChangeStatusSchema, MeetupSchema } from "./participate.schema";
 import { participateService } from "./participate.service";
 import { authMiddleware, AuthenticatedRequest } from "../auth"
+import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
 
 export function registerParticipateRoutes(router: Router) {
+
+  router.use(defaultRateLimiter)
 
   router.post("/participate/:id/join", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
     

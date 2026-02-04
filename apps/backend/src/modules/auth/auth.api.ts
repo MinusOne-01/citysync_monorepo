@@ -2,8 +2,11 @@ import { Router } from "express"
 import { RegisterSchema, LoginSchema, RefreshSchema } from "./auth.schema"
 import { authService } from "./auth.service"
 import { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } from "./auth.utils"
+import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
 
 export function registerAuthRoutes(router: Router) {
+
+  router.use(defaultRateLimiter)
 
   router.post("/auth/register", async (req, res, next) => {
 

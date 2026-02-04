@@ -2,8 +2,11 @@ import { Router } from "express";
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 import { notiService } from "./noti.service";
 import { updateNotiSchema } from "./noti.schema";
+import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
 
 export function registerNotificationsRoutes(router: Router) {
+
+    router.use(defaultRateLimiter)
 
     router.get("/notifications", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 

@@ -2,8 +2,11 @@ import { Router } from "express"
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 import { userService } from "./user.service";
 import { createUserSchema, userUploadCompleteSchema, updateUserSchema, userParamsSchema, userUploadUrlSchema } from "./user.schema";
+import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
 
 export function registeredUserRoutes(router: Router) {
+
+  router.use(defaultRateLimiter)
 
   router.get("/user/me", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
      

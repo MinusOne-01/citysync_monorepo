@@ -2,8 +2,11 @@ import { Router } from "express"
 import { CreateMeetupSchema, EditMeetupSchema, MeetupUploadUrlSchema, ValidateMeetupIdSchema } from "./meetup.schema"
 import { meetupService } from "./meetup.service"
 import { authMiddleware, AuthenticatedRequest } from "../auth"
+import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
 
 export function registerMeetupRoutes(router: Router) {
+
+  router.use(defaultRateLimiter)
 
   router.post("/meetups/create", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
