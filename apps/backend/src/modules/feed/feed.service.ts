@@ -2,6 +2,11 @@ import { feedRepo } from "./feed.repo";
 import { BuildMainFeedInput, BuildMainFeedResponse } from "./feed.type";
 import { redis } from "../../shared/configs/redis";
 import { regionKey } from "../../shared/utils/geobucket";
+import { env } from "../../shared/configs/env";
+
+const BUCKET = env.AWS_S3_BUCKET!;
+const REGION = env.AWS_REGION!;
+
 
 
 export interface FeedService {
@@ -13,6 +18,10 @@ const toRad = (value: number) => (value * Math.PI) / 180;
 
 
 class FeedServiceImpl implements FeedService {
+
+    private getPublicURL(key: string): string {
+        return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+    }
 
     private distanceKm(lat1: number, lng1: number, lat2: number, lng2: number){
 
@@ -78,13 +87,13 @@ class FeedServiceImpl implements FeedService {
 
             return {
                 ...m,
+                meetupImageUrl: m.meetupImageKey ? this.getPublicURL(m.meetupImageKey) : null,
                 distance: dist,
                 score
             };
 
         }).filter(m => m.distance <= radiusKm)
             .sort((a, b) => b.score - a.score)
-              .sort((a, b) => b.score - a.score)
 
 
         const page = scoredFeed.slice(0, limit);

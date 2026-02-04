@@ -6,7 +6,7 @@ export function registerFeedRoutes(router: Router) {
    
     router.get("/feed", async (req, res) => {
 
-        const parsed = getFeedSchema.safeParse(req.body);
+        const parsed = getFeedSchema.safeParse(req.query);
 
         if (!parsed.success) {
             return res.status(400).json({

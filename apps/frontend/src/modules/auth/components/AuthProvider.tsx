@@ -16,6 +16,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const [user, setUser] = useState<AuthUser | null>(null)
     const [loading, setLoading] = useState(true)
+    const status = loading
+        ? "loading"
+        : user
+            ? "authenticated"
+            : "unauthenticated";
+
 
     useEffect(() => {
         let mounted = true
@@ -39,21 +45,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const value = useMemo<AuthContextValue>(() => ({
         user,
         loading,
+        status,
         async login(input) {
-            await authApi.login(input)
-            const me = await authApi.me()
-            setUser(me.user ?? null)
+            await authApi.login(input);
+            const me = await authApi.me();
+            setUser(me.user ?? null);
         },
         async register(input) {
-            await authApi.register(input)
-            const me = await authApi.me()
-            setUser(me.user ?? null)
+            await authApi.register(input);
+            const me = await authApi.me();
+            setUser(me.user ?? null);
         },
         async logout() {
-            await authApi.logout()
-            setUser(null)
+            await authApi.logout();
+            setUser(null);
         }
-    }), [user, loading])
+    }), [user, loading, status]);
+
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 

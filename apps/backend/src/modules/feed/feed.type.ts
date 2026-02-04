@@ -41,6 +41,7 @@ export type MeetupShape = {
     area: string | null;
     placeName: string | null;
     meetupImageKey: string;
+    meetupImageUrl: string | null;
     createdAt: Date;
 }
 
@@ -98,6 +99,3 @@ export type FetchMeetupbyIdInput = {
 
 export type FetchMeetupbyIdResponse = MeetupDetails[]
 
-
-
-}
