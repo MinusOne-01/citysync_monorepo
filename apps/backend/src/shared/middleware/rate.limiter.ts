@@ -18,7 +18,7 @@ function getClientIp(req: Request): string {
 export function createRateLimiter(opts: RateLimitOptions = {}) {
   const {
     keyPrefix = "rl",
-    limit = 100,
+    limit = 10000,
     windowSec = 10 * 60, // 10 minutes
   } = opts
 
@@ -28,7 +28,7 @@ export function createRateLimiter(opts: RateLimitOptions = {}) {
       const key = `${keyPrefix}:${ip}`
 
       const count = await redis.incr(key)
-      console.log("Count-> ", count)
+
       if (count === 1) {
         await redis.expire(key, windowSec)
       }

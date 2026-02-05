@@ -18,8 +18,6 @@ export async function apiRequest<T>(
 
   const { ...fetchOptions } = options;
   const url = `${API_BASE}${path}`;
-
- console.log("sending req-> ", url)
  
   const res = await fetch(url, {
     credentials: "include",
@@ -36,7 +34,11 @@ export async function apiRequest<T>(
     const message =
       typeof body === "string"
         ? body
-        : body?.message ?? "Request failed";
+        : body?.message
+        ?? body?.error?.message
+        ?? body?.error
+        ?? "Request failed"
+
 
     throw new ApiError(message, res.status, body?.code, body);
   }

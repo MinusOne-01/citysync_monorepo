@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "../../../modules/auth/auth.hooks"
 import { useRouter } from "next/navigation"
 import { meetupApi } from "../../../modules/meetups/meetup.api"
 import { uploadMeetupImage } from "../../../modules/meetups/meetup.upload"
@@ -20,6 +21,7 @@ const CreateMeetupClientSchema = z.object({
 
 export default function CreateMeetupPage() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,6 +38,19 @@ export default function CreateMeetupPage() {
   const [locationResults, setLocationResults] = useState<GeoResult[]>([])
   const [selectedLocation, setSelectedLocation] = useState<GeoResult | null>(null)
   const [searching, setSearching] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/login")
+    }
+  }, [authLoading, user, router])
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
+    }
+  }, [imagePreview])
 
   async function onSearchLocation() {
     setError(null)
@@ -84,9 +99,12 @@ export default function CreateMeetupPage() {
     })
 
     if (!parsed.success) {
-      setError("Please fix the form errors before submitting.")
+      const first =
+        parsed.error.issues?.[0]?.message ?? "Please fix the highlighted fields."
+      setError(first)
       return
     }
+
 
     if (!selectedLocation) {
       setError("Please select a location.")
@@ -124,146 +142,198 @@ export default function CreateMeetupPage() {
     }
   }
 
-  return (
-    <main style={{ maxWidth: 600, margin: "48px auto", padding: "0 16px" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 16 }}>Create Meetup</h1>
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <p className="text-sm text-slate-500">Checking session...</p>
+      </main>
+    )
+  }
 
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Title
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
+ return (
+  <main className="min-h-screen px-4 pt-10 pb-20">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+          Create a meetup
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Share an idea and bring people together
+        </p>
+      </div>
 
-        <label>
-          Description
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px", minHeight: 80 }}
-          />
-        </label>
+      {/* Card */}
+      <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-8">
+        <form onSubmit={onSubmit} className="space-y-6">
+          {/* Basic info */}
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Title
+              </label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+            </div>
 
-        <label>
-          Start time
-          <input
-            type="datetime-local"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            required
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        <label>
-          Capacity
-          <input
-            type="number"
-            min={1}
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        <label>
-          Location search
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              value={locationQuery}
-              onChange={(e) => setLocationQuery(e.target.value)}
-              placeholder="Search address or place"
-              style={{ flex: 1, padding: "10px 12px" }}
-            />
-            <button type="button" onClick={onSearchLocation} disabled={searching}>
-              {searching ? "Searching..." : "Search"}
-            </button>
-            <button type="button" onClick={onUseCurrentLocation} disabled={searching}>
-              Use current
-            </button>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Description
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+            </div>
           </div>
-        </label>
 
-        {locationResults.length > 0 && (
-          <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: 8 }}>
-            {locationResults.map((r, i) => (
+          {/* Time & capacity */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Start time
+              </label>
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Capacity (optional)
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-slate-700">
+              Location
+            </label>
+
+            <div className="flex gap-2">
+              <input
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+                placeholder="Search address or place"
+                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm
+                           focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
               <button
-                key={`${r.label}-${i}`}
                 type="button"
-                onClick={() => {
-                  setSelectedLocation(r)
-                  setLocationResults([])
-                  setLocationQuery(r.label)
-                }}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "8px 10px",
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer"
-                }}
+                onClick={onSearchLocation}
+                disabled={searching}
+                className="rounded-lg border border-slate-200 px-3 text-sm
+                           hover:bg-slate-50 transition-colors"
               >
-                {r.label}
+                {searching ? "Searching..." : "Search"}
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={onUseCurrentLocation}
+                disabled={searching}
+                className="rounded-lg border border-slate-200 px-3 text-sm
+                           hover:bg-slate-50 transition-colors"
+              >
+                Use current
+              </button>
+            </div>
+
+            {locationResults.length > 0 && (
+              <div className="rounded-lg border border-slate-200 divide-y">
+                {locationResults.map((r, i) => (
+                  <button
+                    key={`${r.label}-${i}`}
+                    type="button"
+                    onClick={() => {
+                      setSelectedLocation(r)
+                      setLocationResults([])
+                      setLocationQuery(r.label)
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {selectedLocation && (
+              <p className="text-sm text-slate-500">
+                Selected: {selectedLocation.label}
+              </p>
+            )}
           </div>
-        )}
 
-        {selectedLocation && (
-          <div style={{ fontSize: 13, color: "#555" }}>
-            Selected: {selectedLocation.label}
+          {/* Image */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-slate-700">
+              Meetup image
+            </label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                 const file = e.target.files?.[0] ?? null
+                 setImageFile(file)
+
+                 if (imagePreview) URL.revokeObjectURL(imagePreview)
+                 setImagePreview(file ? URL.createObjectURL(file) : null)
+               }}
+              required
+              className="text-sm"
+            />
+            {imagePreview && (
+  <img
+    src={imagePreview}
+    alt="Preview"
+    className="mt-2 h-1/2 w-1/2 rounded-lg border border-slate-200 object-cover"
+  />
+)}
+
+
           </div>
-        )}
 
-        <label>
-          City
-          <input
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
 
-        <label>
-          Area
-          <input
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
+          {/* Action */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-sky-500 px-4 py-2.5
+                       text-sm font-medium text-white
+                       hover:bg-sky-600 transition-colors
+                       disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "Creating..." : "Create meetup"}
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+)
 
-        <label>
-          Place name
-          <input
-            value={placeName}
-            onChange={(e) => setPlaceName(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        <label>
-          Meetup image
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-            required
-          />
-        </label>
-
-        {error && <p style={{ color: "crimson", margin: 0 }}>{error}</p>}
-
-        <button type="submit" disabled={loading} style={{ padding: "10px 12px" }}>
-          {loading ? "Creating..." : "Create Meetup"}
-        </button>
-      </form>
-    </main>
-  )
 }

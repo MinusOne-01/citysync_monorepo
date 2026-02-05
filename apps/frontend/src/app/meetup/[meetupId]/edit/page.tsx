@@ -138,84 +138,177 @@ export default function MeetupEditPage() {
   }
 
   return (
-    <main style={{ maxWidth: 700, margin: "48px auto", padding: "0 16px" }}>
-      <h1 style={{ fontSize: 28, fontWeight: 600, marginBottom: 16 }}>
-        Edit Meetup
-      </h1>
-
-      <form onSubmit={onSave} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Title
-          <input 
-            disabled={isReadOnly}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        <label>
-          Description
-          <textarea 
-            disabled={isReadOnly}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px", minHeight: 80 }}
-          />
-        </label>
-
-        <label>
-          Start time
-          <input 
-            disabled={isReadOnly}
-            type="datetime-local"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        <label>
-          Capacity
-          <input 
-            disabled={isReadOnly}
-            type="number"
-            min={1}
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            style={{ display: "block", width: "100%", padding: "10px 12px" }}
-          />
-        </label>
-
-        {error && <p style={{ color: "crimson", margin: 0 }}>{error}</p>}
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <button
-            type="submit" disabled={saving || isReadOnly}
-            style={{ padding: "10px 12px" }}>
-            {saving ? "Saving..." : "Save changes"}
-          </button>
-
-          <button
-            type="button"
-            onClick={onPublish}
-            disabled={actionLoading || !canPublish}
-            style={{ padding: "10px 12px" }}
-          >
-            {actionLoading ? "Publishing..." : "Publish"}
-          </button>
-
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={actionLoading  || !canCancel}
-            style={{ padding: "10px 12px" }}
-          >
-            {actionLoading ? "Cancelling..." : "Cancel"}
-          </button>
+  <main className="min-h-screen px-4 pt-10 pb-20">
+    <div className="mx-auto w-full max-w-2xl space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Edit meetup details
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Update details or manage the meetup status
+          </p>
         </div>
-      </form>
-    </main>
-  )
+
+        {/* Status badge */}
+        <span
+          className={`
+            rounded-full px-3 py-1 text-xs font-medium
+            ${
+              meetup.status === "DRAFT"
+                ? "bg-slate-100 text-slate-700"
+                : meetup.status === "PUBLISHED"
+                ? "bg-sky-100 text-sky-700"
+                : meetup.status === "CANCELLED"
+                ? "bg-red-100 text-red-700"
+                : "bg-slate-200 text-slate-700"
+            }
+          `}
+        >
+          {meetup.status}
+        </span>
+      </div>
+
+      {isReadOnly && (
+        <p className="text-sm text-slate-500">
+          This meetup can no longer be edited.
+        </p>
+      )}
+
+      {/* Card */}
+      <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-8">
+        <form onSubmit={onSave} className="space-y-6">
+          {/* Fields */}
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Title
+              </label>
+              <input
+                disabled={isReadOnly}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="
+                  w-full rounded-lg border border-slate-200
+                  px-3 py-2 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-sky-400
+                  disabled:bg-slate-50 disabled:text-slate-400
+                "
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-700">
+                Description
+              </label>
+              <textarea
+                disabled={isReadOnly}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                className="
+                  w-full rounded-lg border border-slate-200
+                  px-3 py-2 text-sm
+                  focus:outline-none focus:ring-2 focus:ring-sky-400
+                  disabled:bg-slate-50 disabled:text-slate-400
+                "
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">
+                  Start time
+                </label>
+                <input
+                  disabled={isReadOnly}
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="
+                    w-full rounded-lg border border-slate-200
+                    px-3 py-2 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-sky-400
+                    disabled:bg-slate-50 disabled:text-slate-400
+                  "
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">
+                  Capacity
+                </label>
+                <input
+                  disabled={isReadOnly}
+                  type="number"
+                  min={1}
+                  value={capacity}
+                  onChange={(e) => setCapacity(e.target.value)}
+                  className="
+                    w-full rounded-lg border border-slate-200
+                    px-3 py-2 text-sm
+                    focus:outline-none focus:ring-2 focus:ring-sky-400
+                    disabled:bg-slate-50 disabled:text-slate-400
+                  "
+                />
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={saving || isReadOnly}
+              className="
+                w-full rounded-lg bg-sky-500 px-4 py-2.5
+                text-sm font-medium text-white
+                hover:bg-sky-600 transition-colors
+                disabled:opacity-60 disabled:cursor-not-allowed
+              "
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+
+            {canPublish && (
+              <button
+                type="button"
+                onClick={onPublish}
+                disabled={actionLoading}
+                className="
+                  w-full rounded-lg border border-slate-200 px-4 py-2.5
+                  text-sm font-medium text-slate-700
+                  hover:bg-slate-50 transition-colors
+                "
+              >
+                {actionLoading ? "Publishing…" : "Publish"}
+              </button>
+            )}
+
+            {canCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={actionLoading}
+                className="
+                  w-full rounded-lg border border-red-200 px-4 py-2.5
+                  text-sm font-medium text-red-600
+                  hover:bg-red-50 transition-colors
+                "
+              >
+                {actionLoading ? "Cancelling…" : "Cancel meetup"}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+)
 }

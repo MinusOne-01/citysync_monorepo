@@ -171,7 +171,7 @@ export const authService = {
     try {
       payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET)
     } catch {
-      throw new Error("Invalid refresh token")
+      throw new AppError("Invalid refresh token")
     }
 
     const userId = payload.sub as string
@@ -192,7 +192,7 @@ export const authService = {
     ).then((res) => res.find(Boolean))
 
     if (!matchingToken) {
-      throw new Error("Refresh token not found or revoked")
+      throw new AppError("Refresh token not found or revoked")
     }
 
     // Revoke old token

@@ -3,7 +3,7 @@ import { userRepo } from "./user.repo";
 import { AppError } from "../../shared/configs/errors";
 import { getPresignedUploadUrl } from "../../shared/configs/s3.service";
 import { env } from "../../shared/configs/env";
-import { UserDTO } from "@shared/types/user"
+import { UserProfile } from "./user.type";
 import { NewUserInput, UserUpdateInput, UserDbRecord, SignedUrlResponse } from "./user.type";
 
 const BUCKET = env.AWS_S3_BUCKET!;
@@ -12,9 +12,9 @@ const REGION = env.AWS_REGION!;
 
 export interface UserService {
     createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord>;
-    findUserbyId(id: string): Promise<UserDTO | null>;
+    findUserbyId(id: string): Promise<UserProfile | null>;
     findUserbyAuthId(authId: string): Promise<UserDbRecord | null>;
-    getUserByUsername(username: string): Promise<UserDTO | null>;
+    getUserByUsername(username: string): Promise<Partial<UserProfile> | null>;
     updateUser(userId: string, updateData: Partial<UserUpdateInput>): Promise<Partial<UserDbRecord>>;
     getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse>;
 }
@@ -50,7 +50,7 @@ class UserServiceImpl implements UserService {
         return uploadData;
     }
 
-    async findUserbyId(id: string): Promise<UserDTO | null> {
+    async findUserbyId(id: string): Promise<UserProfile | null> {
 
         const user =  await userRepo.findById(id);
 
@@ -60,6 +60,7 @@ class UserServiceImpl implements UserService {
             id: user.id,
             username: user.username,
             displayName: user.displayName,
+            email: user.email,
             avatarUrl: user.profileImageKey ? this.getPublicURL(user.profileImageKey) : null
         }
 
@@ -72,7 +73,7 @@ class UserServiceImpl implements UserService {
         return user;
     }
 
-    async getUserByUsername(username: string): Promise<UserDTO | null> {
+    async getUserByUsername(username: string): Promise<Partial<UserProfile> | null> {
 
         let user = await userRepo.findByUsername(username);
 

@@ -4,7 +4,13 @@ import { Prisma } from "@prisma/client";
 //Service types
 ////////////////////////
 
-
+export type UserProfile = {
+  id: string
+  username: string
+  email: string
+  displayName: string | null
+  avatarUrl: string | null
+}
 
 export type NewUserInput = {
     authAccountId: string;
