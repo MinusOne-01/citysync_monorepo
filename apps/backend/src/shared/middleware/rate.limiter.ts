@@ -18,7 +18,7 @@ function getClientIp(req: Request): string {
 export function createRateLimiter(opts: RateLimitOptions = {}) {
   const {
     keyPrefix = "rl",
-    limit = 10000,
+    limit = 10000000,
     windowSec = 10 * 60, // 10 minutes
   } = opts
 

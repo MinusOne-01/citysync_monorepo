@@ -87,7 +87,7 @@ class FeedServiceImpl implements FeedService {
 
             return {
                 ...m,
-                meetupImageUrl: m.meetupImageKey ? this.getPublicURL(m.meetupImageKey) : null,
+                imageUrl: this.getPublicURL(m.meetupImageKey),
                 distance: dist,
                 score
             };

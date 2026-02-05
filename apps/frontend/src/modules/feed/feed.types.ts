@@ -22,7 +22,7 @@ export type FeedItem = {
   area: string | null;
   placeName: string | null;
   meetupImageKey: string;
-  meetupImageUrl: string | null;
+  imageUrl: string;
   createdAt: string;
 };
 

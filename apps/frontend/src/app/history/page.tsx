@@ -1,90 +1,74 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { useAuth } from "../../modules/auth/auth.hooks";
-import { useParticipationActions } from "../../modules/participate/participate.hooks";
-import type { ParticipantHistoryItem } from "../../modules/participate/participate.types";
+import { useEffect, useState } from "react"
+import { useAuth } from "../../modules/auth/auth.hooks"
+import { useParticipationActions } from "../../modules/participate/participate.hooks"
+import type { ParticipantHistoryItem } from "../../modules/participate/participate.types"
+import { HistoryMeetupItem } from "../../components/meetups/HistoryMeetupItem"
 
 export default function HistoryPage() {
-  const { status } = useAuth();
-  const { getParticipantHistory } = useParticipationActions();
+  const { status } = useAuth()
+  const { getParticipantHistory } = useParticipationActions()
 
-  const [history, setHistory] = useState<ParticipantHistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [history, setHistory] = useState<ParticipantHistoryItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status !== "authenticated") return;
+    if (status !== "authenticated") return
 
-    setLoading(true);
+    setLoading(true)
     getParticipantHistory()
       .then(setHistory)
-      .finally(() => setLoading(false));
-  }, [status, getParticipantHistory]);
+      .finally(() => setLoading(false))
+  }, [status, getParticipantHistory])
 
   if (status === "loading" || loading) {
     return (
-      <main style={{ maxWidth: 800, margin: "48px auto", padding: "0 16px" }}>
-        <p>Loading history...</p>
+      <main className="min-h-screen px-4 pt-10">
+        <p className="text-sm text-slate-500">Loading history…</p>
       </main>
-    );
+    )
   }
 
   if (status !== "authenticated") {
     return (
-      <main style={{ maxWidth: 800, margin: "48px auto", padding: "0 16px" }}>
-        <p>Please log in to view your history.</p>
+      <main className="min-h-screen px-4 pt-10">
+        <p className="text-sm text-slate-500">
+          Please log in to view your meetup history.
+        </p>
       </main>
-    );
+    )
   }
 
   return (
-    <main style={{ maxWidth: 800, margin: "48px auto", padding: "0 16px" }}>
-      <h1 style={{ fontSize: 26, fontWeight: 700 }}>Your Meetup History</h1>
-
-      {history.length === 0 ? (
-        <p style={{ marginTop: 16 }}>No history yet.</p>
-      ) : (
-        <div
-          style={{
-            marginTop: 16,
-            maxHeight: 520,
-            overflowY: "auto",
-            border: "1px solid #eee",
-            borderRadius: 8,
-            padding: 12,
-          }}
-        >
-          {history.map((h) => (
-            <div
-              key={`${h.meetupId}-${h.joinedAt}`}
-              style={{
-                display: "flex",
-                gap: 12,
-                padding: "12px 0",
-                borderBottom: "1px solid #f0f0f0",
-              }}
-            >
-              <img
-                src={h.meetupImageUrl}
-                alt={h.placeName ?? "Meetup"}
-                style={{ width: 90, height: 70, objectFit: "cover", borderRadius: 6 }}
-              />
-
-              <div>
-                <div style={{ fontWeight: 600 }}>
-                  {h.placeName ?? "Meetup"} · {h.city ?? "Unknown city"}
-                </div>
-                <div style={{ color: "#666", fontSize: 14 }}>
-                  {new Date(h.meetupDate).toLocaleString()}
-                </div>
-                <div style={{ color: "#666", fontSize: 14 }}>
-                  Role: {h.role}
-                </div>
-              </div>
-            </div>
-          ))}
+    <main className="min-h-screen px-4 pt-10 pb-24">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            Your meetup history
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Meetups you’ve joined or participated in
+          </p>
         </div>
-      )}
+
+        {/* Content */}
+        {history.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            You haven’t joined any meetups yet.
+          </p>
+        ) : (
+          <div className="rounded-2xl bg-white border border-slate-200 divide-y">
+            {history.map((item) => (
+              <HistoryMeetupItem
+                key={`${item.meetupId}-${item.joinedAt}`}
+                item={item}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </main>
-  );
+  )
 }

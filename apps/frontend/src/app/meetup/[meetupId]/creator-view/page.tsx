@@ -27,40 +27,114 @@ export default function CreatorMeetupViewPage() {
   }
 
   return (
-    <main style={{ maxWidth: 700, margin: "48px auto", padding: "0 16px" }}>
-      <h1 style={{ fontSize: 30, fontWeight: 700 }}>{meetup.title}</h1>
-      <p style={{ marginTop: 6, color: "#555" }}>
-        {new Date(meetup.startTime).toLocaleString()}
-      </p>
+  <main className="min-h-screen px-4 pt-10 pb-24">
+    <div className="mx-auto w-full max-w-3xl space-y-8">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+            {meetup.title}
+          </h1>
 
+          <span
+            className={`
+              rounded-full px-3 py-1 text-xs font-medium
+              ${
+                meetup.status === "DRAFT"
+                  ? "bg-slate-100 text-slate-700"
+                  : meetup.status === "PUBLISHED"
+                  ? "bg-sky-100 text-sky-700"
+                  : meetup.status === "CANCELLED"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-slate-200 text-slate-700"
+              }
+            `}
+          >
+            {meetup.status}
+          </span>
+        </div>
+
+        <p className="text-sm text-slate-500">
+          {new Date(meetup.startTime).toLocaleString()}
+        </p>
+      </div>
+
+      {/* Image */}
       {meetup.imageUrl && (
         <img
           src={meetup.imageUrl}
           alt={meetup.title}
-          style={{ marginTop: 16, width: "100%", borderRadius: 12 }}
+          className="w-full rounded-2xl border border-slate-200 object-cover"
         />
       )}
 
-      {meetup.description && (
-        <p style={{ marginTop: 16 }}>{meetup.description}</p>
-      )}
+      {/* Details */}
+      <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-8 space-y-6">
+        {meetup.description && (
+          <p className="text-sm text-slate-700 leading-relaxed">
+            {meetup.description}
+          </p>
+        )}
 
-      <div style={{ marginTop: 16 }}>
-        <div><strong>Status:</strong> {meetup.status}</div>
-        <div><strong>City:</strong> {meetup.city ?? "—"}</div>
-        <div><strong>Area:</strong> {meetup.area ?? "—"}</div>
-        <div><strong>Place:</strong> {meetup.placeName ?? "—"}</div>
-        <div><strong>Capacity:</strong> {meetup.capacity ?? "—"}</div>
-      </div>
-          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              <Link href={`/meetup/${meetup.id}/edit`} style={{ padding: "8px 12px" }}>
-                  Edit
-              </Link>
-              <Link href={`/meetup/${meetup.id}/participants`} style={{ padding: "8px 12px" }}>
-                  Participants
-              </Link>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-slate-500">City</span>
+            <div className="font-medium text-slate-900">
+              {meetup.city ?? "—"}
+            </div>
           </div>
 
-    </main>
-  )
+          <div>
+            <span className="text-slate-500">Area</span>
+            <div className="font-medium text-slate-900">
+              {meetup.area ?? "—"}
+            </div>
+          </div>
+
+          <div>
+            <span className="text-slate-500">Place</span>
+            <div className="font-medium text-slate-900">
+              {meetup.placeName ?? "—"}
+            </div>
+          </div>
+
+          <div>
+            <span className="text-slate-500">Capacity</span>
+            <div className="font-medium text-slate-900">
+              {meetup.capacity ?? "Unlimited"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <Link href={`/meetup/${meetup.id}/edit`} className="w-full">
+          <button
+            className="
+              w-full rounded-lg bg-sky-500 px-4 py-2.5
+              text-sm font-medium text-white
+              hover:bg-sky-600 transition-colors
+            "
+          >
+            Edit meetup
+          </button>
+        </Link>
+
+        <Link href={`/meetup/${meetup.id}/participants`} className="w-full">
+          <button
+            className="
+              w-full rounded-lg border border-slate-200 px-4 py-2.5
+              text-sm font-medium text-slate-700
+              hover:bg-slate-50 transition-colors
+            "
+          >
+            View participants
+          </button>
+        </Link>
+      </div>
+    </div>
+  </main>
+)
+
 }
