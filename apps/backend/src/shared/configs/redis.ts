@@ -1,11 +1,9 @@
 import Redis from "ioredis";
 import { env } from "./env";
 
-const REDIS_HOST = env.REDIS_HOST
-const REDIS_PORT = env.REDIS_PORT
+const REDIS_URL = env.REDIS_URL
 
-export const redis = new Redis({
-  host: REDIS_HOST,
-  port: REDIS_PORT,
-  maxRetriesPerRequest: null
+export const redis = new Redis(process.env.REDIS_URL!, {
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false
 });

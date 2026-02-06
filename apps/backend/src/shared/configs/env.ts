@@ -35,6 +35,5 @@ export const env = {
   REFRESH_TOKEN_TTL_DAYS: optionalNumber("REFRESH_TOKEN_TTL_DAYS") ?? 30,
 
   REDIS_URL: process.env.REDIS_URL,
-  REDIS_HOST: process.env.REDIS_HOST,
-  REDIS_PORT: optionalNumber("REDIS_PORT"),
+  
 };
