@@ -1,23 +1,37 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { apiFetch } from "@/src/lib/api"
-
+import Link from "next/link"
 
 export default function Home() {
-  const [status, setStatus] = useState<string>("loading")
-
-  useEffect(() => {
-    apiFetch<{ status: string }>("/health")
-      .then((data) => setStatus(data.status))
-      .catch(() => setStatus("error"))
-  }, [])
-
   return (
-    <main style={{ padding: 20 }}>
-      <h1>CitySync</h1>
-      <p>Backend status: {status}</p>
+    <main className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center space-y-6 max-w-xl">
+        {/* Brand */}
+        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
+          CitySync
+        </h1>
+
+        {/* Tagline */}
+        <p className="text-base text-slate-600">
+          Organise, Discover and Join meetups happening around you.
+        </p>
+
+        {/* CTA */}
+        <div className="pt-2">
+          <Link href="/feed">
+            <button
+              className="
+                rounded-lg bg-sky-500 px-6 py-3
+                text-sm font-medium text-white
+                hover:bg-sky-600
+                transition-colors
+              "
+            >
+              Find your next meetup
+            </button>
+          </Link>
+        </div>
+      </div>
     </main>
   )
 }
-

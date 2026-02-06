@@ -1,35 +1,56 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { useNotifications } from "../noti.hooks"
-import { useAuth } from "../../auth/auth.hooks"
+import { useEffect, useRef, useState } from "react";
+import { useNotifications } from "../noti.hooks";
+import { useAuth } from "../../auth/auth.hooks";
 
 export default function NotificationsOverlay() {
+  const { user, loading: authLoading } = useAuth();
 
-  const { user, loading: authLoading } = useAuth()
-  if (authLoading || !user) return null
+  const [open, setOpen] = useState(false);
+  const [showLoginHint, setShowLoginHint] = useState(false);
 
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement | null>(null)
-  const { items, loading, error, nextCursor, loadMore, markRead, markAllRead } =
-    useNotifications(20)
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  // Hook must be called unconditionally
+  const {
+    items,
+    loading,
+    error,
+    nextCursor,
+    loadMore,
+    markRead,
+    markAllRead,
+  } = useNotifications(20);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (!ref.current) return
-      if (!ref.current.contains(e.target as Node)) setOpen(false)
+      if (!ref.current) return;
+      if (!ref.current.contains(e.target as Node)) setOpen(false);
     }
-    if (open) document.addEventListener("mousedown", onClickOutside)
-    return () => document.removeEventListener("mousedown", onClickOutside)
-  }, [open])
+    if (open) document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [open]);
 
-  const unreadCount = items.filter((n) => !n.isRead).length
+  const unreadCount = items.filter((n) => !n.isRead).length;
+
+  function handleToggle() {
+    if (authLoading) return;
+
+    if (!user) {
+      setShowLoginHint(true);
+      setTimeout(() => setShowLoginHint(false), 2000);
+      return;
+    }
+
+    setOpen((v) => !v);
+  }
 
   return (
     <div ref={ref} style={{ position: "fixed", bottom: 24, right: 24, zIndex: 50 }}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         style={{
           position: "relative",
           width: 48,
@@ -38,12 +59,30 @@ export default function NotificationsOverlay() {
           border: "1px solid #ddd",
           background: "#fff",
           boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-          cursor: "pointer"
+          cursor: "pointer",
+          display: "grid",
+          placeItems: "center"
+
         }}
         aria-label="Notifications"
+        aria-expanded={open}
+        aria-controls="notifications-panel"
       >
-        🔔
-        {unreadCount > 0 && (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 7H3s3 0 3-7" />
+          <path d="M10 19a2 2 0 0 0 4 0" />
+        </svg>
+        {unreadCount > 0 && user && (
           <span
             style={{
               position: "absolute",
@@ -53,7 +92,7 @@ export default function NotificationsOverlay() {
               color: "#fff",
               borderRadius: 999,
               padding: "2px 6px",
-              fontSize: 12
+              fontSize: 12,
             }}
           >
             {unreadCount}
@@ -61,8 +100,29 @@ export default function NotificationsOverlay() {
         )}
       </button>
 
-      {open && (
+      {showLoginHint && (
         <div
+          style={{
+            position: "absolute",
+            right: 0,
+            bottom: 60,
+            background: "#111",
+            color: "#fff",
+            padding: "8px 10px",
+            borderRadius: 8,
+            fontSize: 12,
+            boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+          }}
+        >
+          Login to see notifications
+        </div>
+      )}
+
+      {user && open && (
+        <div
+          id="notifications-panel"
+          role="dialog"
+          aria-label="Notifications"
           style={{
             position: "absolute",
             right: 0,
@@ -74,7 +134,7 @@ export default function NotificationsOverlay() {
             background: "#fff",
             borderRadius: 12,
             boxShadow: "0 10px 24px rgba(0,0,0,0.12)",
-            padding: 12
+            padding: 12,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -98,7 +158,7 @@ export default function NotificationsOverlay() {
                 style={{
                   padding: "8px 6px",
                   borderBottom: "1px solid #f0f0f0",
-                  opacity: n.isRead ? 0.6 : 1
+                  opacity: n.isRead ? 0.6 : 1,
                 }}
               >
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{n.type}</div>
@@ -109,6 +169,7 @@ export default function NotificationsOverlay() {
                   type="button"
                   onClick={() => markRead(n.notiId)}
                   style={{ fontSize: 12, marginTop: 6 }}
+                  disabled={n.isRead}
                 >
                   Mark read
                 </button>
@@ -117,16 +178,12 @@ export default function NotificationsOverlay() {
           </ul>
 
           {nextCursor && (
-            <button
-              type="button"
-              onClick={loadMore}
-              style={{ width: "100%", marginTop: 8 }}
-            >
+            <button type="button" onClick={loadMore} style={{ width: "100%", marginTop: 8 }}>
               Load more
             </button>
           )}
         </div>
       )}
     </div>
-  )
+  );
 }

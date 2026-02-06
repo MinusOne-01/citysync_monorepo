@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${font2.className} bg-sky-300 text-slate-900 antialiased`}>
 
-        <AuthProvider> {children}</AuthProvider>
+        <AuthProvider><NotificationsOverlay/> {children}</AuthProvider>
 
       </body>
     </html>

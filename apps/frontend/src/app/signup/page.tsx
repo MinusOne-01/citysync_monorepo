@@ -43,7 +43,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-start justify-center px-4 pt-20">
+    <main className="min-h-screen flex items-start justify-center px-4 pt-60">
       <div className="w-full max-w-md">
         <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-8">
           {/* Header */}

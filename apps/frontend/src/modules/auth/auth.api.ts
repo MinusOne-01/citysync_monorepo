@@ -23,10 +23,6 @@ export const authApi = {
     return apiRequest<void>("/auth/logout", { method: "POST" })
   },
 
-  refresh() {
-    return apiRequest<{ ok: true }>("/auth/refresh", { method: "POST" })
-  },
-
   // adjust path to your backend "current user" endpoint
   me() {
     return apiRequest<{ user: any }>("/user/me", { method: "GET" })

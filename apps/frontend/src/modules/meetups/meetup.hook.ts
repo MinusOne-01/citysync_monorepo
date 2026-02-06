@@ -41,7 +41,6 @@ function useMeetupBase(meetupId: string | null, mode: "public" | "creator"): Hoo
         if (mounted) setMeetup(res.meetup)
       } catch (err) {
         if (mode === "creator" && err instanceof ApiError && err.status === 401) {
-          router.replace("/login")
           return
         }
         if (mounted) setError(err)

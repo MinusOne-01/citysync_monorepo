@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         async function bootstrap() {
             try {
-                await authApi.refresh()
                 const me = await authApi.me()
                 if (mounted) setUser(me.user ?? null)
             } catch {

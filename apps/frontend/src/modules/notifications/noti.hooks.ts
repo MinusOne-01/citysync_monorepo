@@ -23,7 +23,6 @@ export function useNotifications(limit = 20) {
       setNextCursor(res.nextCursor)
     } catch (err: any) {
       if (err instanceof ApiError && err.status === 401) {
-        router.replace("/login")
         return
       }
       setError(err)
