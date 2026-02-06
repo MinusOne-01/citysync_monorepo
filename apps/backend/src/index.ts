@@ -11,6 +11,8 @@ import { registerParticipateRoutes } from "./modules/participate"
 import { registerFeedRoutes } from "./modules/feed"
 import { registerNotificationsRoutes } from "./modules/notifications"
 
+const PORT = process.env.PORT || 3000;
+
 const app = express()
 const router = express.Router()
 
@@ -23,7 +25,6 @@ app.use(
 
 app.use(express.json())
 app.use(cookieParser());
-
 
 
 registerAuthRoutes(router)
@@ -39,13 +40,11 @@ app.use(globalErrorHandler)
 
 
 
-
-
-
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" })
 })
 
-app.listen(3001, () => {
-  console.log("Backend running on :3001")
-})
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
+});
+

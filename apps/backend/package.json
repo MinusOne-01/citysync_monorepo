@@ -12,7 +12,11 @@
     "dev:noti-worker": "ts-node-dev --respawn src/shared/workers/notificationWorker/noti.worker.ts",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:feed-worker\" \"npm run dev:noti-worker\"",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+
+    "start:api": "node dist/index.js",
+    "start:feed-worker": "node dist/shared/workers/feedworker/feed.worker.entry.js",
+    "start:noti-worker": "node dist/shared/workers/notificationWorker/noti.worker.js"
   },
   "keywords": [],
   "author": "",

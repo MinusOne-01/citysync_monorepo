@@ -18,7 +18,6 @@ function popularityScore(
 }
 
 export async function runFeedWorker() {
-  console.log("[feed-worker] started");
 
   const regions = await repo.findActiveRegions();
 
@@ -52,5 +51,4 @@ export async function runFeedWorker() {
     }
   }
 
-  console.log("[feed-worker] finished");
 }
