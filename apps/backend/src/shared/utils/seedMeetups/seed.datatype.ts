@@ -1,4 +1,4 @@
-import type { MeetupStatus } from "@prisma/client"
+import type { MeetupStatus } from "@prisma/client/edge"
 
 export const ADMIN_ORGANIZER_ID = "4597da77-86db-4ede-bc49-c4217eab4eb8"
 

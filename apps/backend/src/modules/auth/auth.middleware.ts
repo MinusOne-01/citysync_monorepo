@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
-import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, ACCESS_TOKEN_TTL } from "../../shared/configs/auth"
+import { env } from "../../shared/configs/env"
 import { authService } from "./auth.service"
 import { setAuthCookies } from "./auth.utils"
 
@@ -15,6 +15,7 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction
 ) {
+
   const accessToken = req.cookies.access_token
 
   // If no access token, try refresh
@@ -26,7 +27,7 @@ export async function authMiddleware(
       const tokens = await authService.refresh(refreshToken)
       setAuthCookies(res, tokens)
 
-      const payload = jwt.verify(tokens.accessToken, JWT_ACCESS_SECRET) as { sub: string }
+      const payload = jwt.verify(tokens.accessToken, env.JWT_ACCESS_SECRET) as { sub: string }
       req.user = { userId: payload.sub }
       return next()
     } catch {
@@ -35,7 +36,7 @@ export async function authMiddleware(
   }
 
   try {
-    const payload = jwt.verify(accessToken, JWT_ACCESS_SECRET) as { sub: string }
+    const payload = jwt.verify(accessToken, env.JWT_ACCESS_SECRET) as { sub: string }
     req.user = { userId: payload.sub }
     return next()
   } catch {
@@ -47,7 +48,7 @@ export async function authMiddleware(
       const tokens = await authService.refresh(refreshToken)
       setAuthCookies(res, tokens)
 
-      const payload = jwt.verify(tokens.accessToken, JWT_ACCESS_SECRET) as { sub: string }
+      const payload = jwt.verify(tokens.accessToken, env.JWT_ACCESS_SECRET) as { sub: string }
       req.user = { userId: payload.sub }
       return next()
     } catch {

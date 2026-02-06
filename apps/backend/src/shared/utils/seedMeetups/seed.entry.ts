@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom"
 import { addDays, subDays } from "date-fns"
-import type { MeetupStatus } from "@prisma/client"
+import type { MeetupStatus } from "@prisma/client/edge"
 import { prisma } from "../../configs/db"
 import { ADMIN_ORGANIZER_ID, CAPACITY_POOL, LOCATION_PRESETS, MEETUP_DESCRIPTIONS, MEETUP_IMAGE_KEYS, MEETUP_TITLES, STATUS_POOL } from "./seed.datatype"
 

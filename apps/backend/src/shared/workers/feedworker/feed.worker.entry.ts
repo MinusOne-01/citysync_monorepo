@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { runFeedWorker } from "./feed.worker";
 
 async function start() {

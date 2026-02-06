@@ -3,6 +3,7 @@ import express from "express"
 import cors from "cors"
 import { globalErrorHandler } from "./shared/middleware/error.middleware"
 import cookieParser from "cookie-parser"
+import { env } from "./shared/configs/env"
 
 import { registerAuthRoutes } from "./modules/auth"
 import { registeredUserRoutes } from "./modules/user"
@@ -11,7 +12,7 @@ import { registerParticipateRoutes } from "./modules/participate"
 import { registerFeedRoutes } from "./modules/feed"
 import { registerNotificationsRoutes } from "./modules/notifications"
 
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT || 3001;
 
 const app = express()
 const router = express.Router()

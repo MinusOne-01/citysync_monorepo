@@ -1,6 +1,7 @@
 import { prisma } from "../../shared/configs/db";
 import { CreateParticipationInput, CreateParticipationResponse, DeleteParticipationInput, DeleteParticipationResponse, FetchMeetupParticipantsInput, FetchMeetupParticipantsResponse, ParticipationRole, ApproveParticipantStatusInput, ApproveParticipantStatusResponse, CancelParticipantStatusInput, CancelParticipantStatusResponse, FetchParticipantStatusResponse, FetchParticipantStatusInput, FetchParticipantHistoryInput, FetchParticipantHistoryResponse } from "./participate.type";
 import { AppError } from "../../shared/configs/errors";
+import { Prisma } from "@prisma/client";
 
 
 export interface ParticipateRepository {
@@ -39,7 +40,7 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
     async deleteParticipation(input: DeleteParticipationInput): Promise<DeleteParticipationResponse> {
 
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
             await tx.participation.deleteMany({
                 where: {
@@ -76,7 +77,7 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
     async approveParticipantStatus(input: ApproveParticipantStatusInput): Promise<ApproveParticipantStatusResponse> {
         
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
             const record = await tx.participation.findUnique({
                 where: {
@@ -119,7 +120,7 @@ class ParticipateRepositoryImpl implements ParticipateRepository {
 
     async cancelParticipantStatus(input: CancelParticipantStatusInput): Promise<CancelParticipantStatusResponse> {
         
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
 
             await tx.participation.updateMany({
                 where: {

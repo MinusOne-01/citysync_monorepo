@@ -13,7 +13,6 @@
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:feed-worker\" \"npm run dev:noti-worker\"",
     "build": "prisma generate && tsc",
     "start": "node dist/index.js",
-
     "start:api": "node dist/index.js",
     "start:feed-worker": "node dist/shared/workers/feedworker/feed.worker.entry.js",
     "start:noti-worker": "node dist/shared/workers/notificationWorker/noti.worker.js"

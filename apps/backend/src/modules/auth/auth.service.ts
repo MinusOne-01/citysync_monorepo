@@ -4,12 +4,7 @@ import { authRepo } from "./auth.repo"
 import { userService } from "../user/user.service"
 import { prisma } from "../../shared/configs/db"
 import { Prisma } from "@prisma/client"
-import {
-  JWT_ACCESS_SECRET,
-  JWT_REFRESH_SECRET,
-  ACCESS_TOKEN_TTL,
-  REFRESH_TOKEN_TTL_DAYS
-} from "../../shared/configs/auth"
+import { env } from "../../shared/configs/env"
 import { AppError } from "../../shared/configs/errors"
 
 
@@ -74,19 +69,19 @@ export const authService = {
       // 5) Issue tokens
       const accessToken = jwt.sign(
         { sub: user.id },
-        JWT_ACCESS_SECRET,
-        { expiresIn: ACCESS_TOKEN_TTL }
+        env.JWT_ACCESS_SECRET,
+        { expiresIn: env.ACCESS_TOKEN_TTL as jwt.SignOptions["expiresIn"] }
       )
 
       const refreshToken = jwt.sign(
         { sub: user.id },
-        JWT_REFRESH_SECRET,
-        { expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d` }
+        env.JWT_REFRESH_SECRET,
+        { expiresIn: `${env.REFRESH_TOKEN_TTL_DAYS}d` }
       )
 
       const refreshTokenHash = await bcrypt.hash(refreshToken, 12)
       const expiresAt = new Date(
-        Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
+        Date.now() + env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
       )
 
       // 6) Store refresh token
@@ -135,22 +130,22 @@ export const authService = {
     // Issue access token
     const accessToken = jwt.sign(
       { sub: user.id },
-      JWT_ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      env.JWT_ACCESS_SECRET,
+      { expiresIn: env.ACCESS_TOKEN_TTL as jwt.SignOptions["expiresIn"] }
     )
 
     // Issue refresh token
     const refreshToken = jwt.sign(
       { sub: user.id },
-      JWT_REFRESH_SECRET,
-      { expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d` }
+      env.JWT_REFRESH_SECRET,
+      { expiresIn: `${env.REFRESH_TOKEN_TTL_DAYS}d` }
     )
 
     // Store hashed refresh token
     const refreshTokenHash = await bcrypt.hash(refreshToken, 12)
 
     const expiresAt = new Date(
-      Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
+      Date.now() + env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
     )
 
     await authRepo.saveRefreshToken({
@@ -169,7 +164,7 @@ export const authService = {
     // Verify refresh token signature
     let payload: any
     try {
-      payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET)
+      payload = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET)
     } catch {
       throw new AppError("Invalid refresh token")
     }
@@ -185,7 +180,7 @@ export const authService = {
     })
 
     const matchingToken = await Promise.all(
-      tokens.map(async (token) => {
+      tokens.map(async (token: any) => {
         const match = await bcrypt.compare(refreshToken, token.tokenHash)
         return match ? token : null
       })
@@ -204,20 +199,20 @@ export const authService = {
     // Issue new tokens
     const newAccessToken = jwt.sign(
       { sub: userId },
-      JWT_ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_TTL }
+      env.JWT_ACCESS_SECRET,
+      { expiresIn: env.ACCESS_TOKEN_TTL as jwt.SignOptions["expiresIn"] }
     )
 
     const newRefreshToken = jwt.sign(
       { sub: userId },
-      JWT_REFRESH_SECRET,
-      { expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d` }
+      env.JWT_REFRESH_SECRET,
+      { expiresIn: `${env.REFRESH_TOKEN_TTL_DAYS}d` }
     )
 
     const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 12)
 
     const expiresAt = new Date(
-      Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
+      Date.now() + env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000
     )
 
     await prisma.authRefreshToken.create({
@@ -243,7 +238,7 @@ export const authService = {
     })
 
     const matchingToken = await Promise.all(
-      tokens.map(async (token) => {
+      tokens.map(async (token: any) => {
         const match = await bcrypt.compare(refreshToken, token.tokenHash)
         return match ? token : null
       })

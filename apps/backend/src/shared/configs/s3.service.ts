@@ -3,7 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import crypto from "crypto";
-import { AppError } from "./errors";
+
 
 const REGION = env.AWS_REGION!;
 const BUCKET = env.AWS_S3_BUCKET!;
