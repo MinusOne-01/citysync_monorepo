@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function Home() {
   return (
-    <main className="-mt-10 min-h-screen flex items-center justify-center px-4 bg-gradient-to-b from-sky-300 to-white">
+    <main className="-mt-10 min-h-screen flex items-center justify-center px-4 bg-linear-to-b from-sky-300 to-white">
       <div className="
         w-full max-w-xl
         rounded-3xl bg-white
