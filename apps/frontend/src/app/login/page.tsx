@@ -52,7 +52,7 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Sign in to find your next meetup
+              Sign in to join your next meetup
             </p>
           </div>
 

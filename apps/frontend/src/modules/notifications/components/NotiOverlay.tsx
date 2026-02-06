@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNotifications } from "../noti.hooks";
 import { useAuth } from "../../auth/auth.hooks";
+import { useRouter } from "next/navigation";
+
 
 export default function NotificationsOverlay() {
+
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
   const [open, setOpen] = useState(false);
@@ -155,6 +159,7 @@ export default function NotificationsOverlay() {
             {items.map((n) => (
               <li
                 key={n.notiId}
+                onClick={() => router.push(`/meetup/${n.data.meetupId}`)}
                 style={{
                   padding: "8px 6px",
                   borderBottom: "1px solid #f0f0f0",
@@ -162,12 +167,18 @@ export default function NotificationsOverlay() {
                 }}
               >
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{n.type}</div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>
+                   {n.data.participantName}
+                </div>
                 <div style={{ fontSize: 12, color: "#666" }}>
                   {new Date(n.createdAt).toLocaleString()}
                 </div>
                 <button
                   type="button"
-                  onClick={() => markRead(n.notiId)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    markRead(n.notiId)
+                  }}
                   style={{ fontSize: 12, marginTop: 6 }}
                   disabled={n.isRead}
                 >

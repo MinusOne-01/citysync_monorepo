@@ -2,17 +2,25 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "../../modules/auth/auth.hooks"
+import { useRouter } from "next/navigation"
 import { useParticipationActions } from "../../modules/participate/participate.hooks"
 import type { ParticipantHistoryItem } from "../../modules/participate/participate.types"
 import { HistoryMeetupItem } from "../../components/meetups/HistoryMeetupItem"
 
 export default function HistoryPage() {
+  const router = useRouter()
   const { status } = useAuth()
   const { getParticipantHistory } = useParticipationActions()
 
   const [history, setHistory] = useState<ParticipantHistoryItem[]>([])
   const [loading, setLoading] = useState(true)
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+  
   useEffect(() => {
     if (status !== "authenticated") return
 

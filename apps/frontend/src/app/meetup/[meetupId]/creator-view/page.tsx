@@ -9,6 +9,8 @@ export default function CreatorMeetupViewPage() {
   const params = useParams()
   const meetupId = typeof params.meetupId === "string" ? params.meetupId : null
   const { meetup, loading, error } = useCreatorMeetup(meetupId)
+  const isPublished = meetup?.status === "PUBLISHED";
+
 
   if (loading) {
     return (
@@ -123,6 +125,7 @@ export default function CreatorMeetupViewPage() {
 
         <Link href={`/meetup/${meetup.id}/participants`} className="w-full">
           <button
+            disabled={!isPublished}
             className="
               w-full rounded-lg border border-slate-200 px-4 py-2.5
               text-sm font-medium text-slate-700

@@ -54,5 +54,3 @@ export async function runFeedWorker() {
 
   console.log("[feed-worker] finished");
 }
-
-runFeedWorker();

@@ -133,7 +133,7 @@ export default function CreateMeetupPage() {
         meetupImageKey: uploadData.key
       })
 
-      router.push(`/meetup/${res.meetupId}/edit`)
+      router.push(`/meetup/${res.meetupId}/creator-view`)
     } catch (err) {
       if (err instanceof ApiError) setError(err.message)
       else setError("Failed to create meetup")

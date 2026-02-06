@@ -4,34 +4,35 @@ import Link from "next/link"
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="text-center space-y-6 max-w-xl">
-        {/* Brand */}
-        <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
-          CitySync
+    <main className="-mt-10 min-h-screen flex items-center justify-center px-4 bg-gradient-to-b from-sky-300 to-white">
+      <div className="
+        w-full max-w-xl
+        rounded-3xl bg-white
+        px-8 py-20
+        text-center space-y-6
+        shadow-sm
+      ">
+        <h1 className="text-5xl font-semibold tracking-tight">
+          <span className="text-sky-500">City</span>
+          <span className="text-slate-800">Sync</span>
         </h1>
 
-        {/* Tagline */}
         <p className="text-base text-slate-600">
-          Organise, Discover and Join meetups happening around you.
+          Organise, discover, and join meetups happening around you.
         </p>
 
-        {/* CTA */}
-        <div className="pt-2">
-          <Link href="/feed">
-            <button
-              className="
-                rounded-lg bg-sky-500 px-6 py-3
-                text-sm font-medium text-white
-                hover:bg-sky-600
-                transition-colors
-              "
-            >
-              Find your next meetup
-            </button>
-          </Link>
-        </div>
+        <Link href="/feed">
+          <button className="
+            mt-4 rounded-xl bg-sky-500 px-7 py-3
+            text-sm font-medium text-white
+            hover:bg-sky-600 transition
+          ">
+            Find your next meetup
+          </button>
+        </Link>
       </div>
     </main>
   )
 }
+
+

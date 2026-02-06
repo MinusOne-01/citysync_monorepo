@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "../modules/auth/components/AuthProvider";
 import NotificationsOverlay from "../modules/notifications/components/NotiOverlay";
 import { Nunito, Poppins, Inter } from "next/font/google";
-import { PageContainer } from "../components/layout/PageContainer";
+import TopNav from "../components/navbar/TopNav";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -38,8 +38,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${font2.className} bg-sky-300 text-slate-900 antialiased`}>
 
-        <AuthProvider><NotificationsOverlay/> {children}</AuthProvider>
-
+        <AuthProvider>
+          <TopNav />
+          <div className="pt-10">
+            {children}
+          </div>
+          <NotificationsOverlay />
+        </AuthProvider>
+        
       </body>
     </html>
   );

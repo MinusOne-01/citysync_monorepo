@@ -191,9 +191,10 @@ export default function FeedPage() {
         )}
 
         {!loading && items.length === 0 && (
-          <p className="text-sm text-slate-500">
-            No meetups found near this location.
-          </p>
+          <div className="text-sm text-slate-500 space-y-1">
+            <p>No meetups found near this location</p>
+            <p>Try popular locations like Delhi, Mumbai, Hyderabad, Bangalore, Pune</p>
+          </div>
         )}
 
         {!loading && items.length > 0 && (

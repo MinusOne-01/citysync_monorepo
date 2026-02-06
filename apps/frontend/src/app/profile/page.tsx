@@ -11,6 +11,7 @@ import { ApiError } from "../../shared/utils/apiError"
 export default function ProfilePage() {
   const router = useRouter()
   const { logout } = useAuth()
+  const { status } = useAuth();
   const { user, loading, error, refresh } = useUserMe()
   const [isEditing, setIsEditing] = useState(false)
 
@@ -25,13 +26,19 @@ export default function ProfilePage() {
   const [loggingOut, setLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState<string | null>(null)
 
+  
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace("/login")
       return
     }
-    if (user){
+    if (user) {
       setDisplayName(user.displayName ?? "")
       setEmail(user.email ?? "")
     }

@@ -1,10 +1,18 @@
+export type NotificationData = {
+  meetupId: string
+  organizerId: string
+  participantId: string
+  participantName: string
+}
+
 export type NotificationRecord = {
   notiId: string
   type: string
-  data: unknown
+  data: NotificationData
   isRead: boolean
   createdAt: string
 }
+
 
 export type NotificationsPage = {
   items: NotificationRecord[]
