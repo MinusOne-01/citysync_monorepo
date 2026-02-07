@@ -35,7 +35,8 @@ CitySync is a location-aware meetup platform built with a modern full-stack arch
 `-- README.md
 ```
 
-(docs/screenshots/prod.png)
+## Production Environment
+![Prod](docs/screenshots/prod.png)
 
 ## Architecture
 
@@ -76,7 +77,7 @@ This keeps strong domain boundaries without premature microservice complexity.
 
 This avoids blocking API requests and isolates side effects.
 
-## Feed Curation
+### Feed Curation
 
 Feed ranking uses:
 - User latitude/longitude
