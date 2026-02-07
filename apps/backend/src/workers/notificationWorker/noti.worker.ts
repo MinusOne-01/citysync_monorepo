@@ -63,6 +63,8 @@ async function processMessages(res: any) {
 
 export async function runNotificationWorker() {
 
+    console.error("notification-worker booting...")
+
     await ensureGroup();
 
     await processPending();

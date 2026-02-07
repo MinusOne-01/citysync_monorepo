@@ -14,8 +14,8 @@
     "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "start:api": "node dist/index.js",
-    "start:feed-worker": "node dist/shared/workers/feedworker/feed.worker.entry.js",
-    "start:noti-worker": "node dist/shared/workers/notificationWorker/noti.worker.js"
+    "start:feed-worker": "node dist/workers/feedworker/feed.worker.entry.js",
+    "start:noti-worker": "node dist/workers/notificationWorker/noti.worker.js"
   },
   "keywords": [],
   "author": "",
