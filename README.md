@@ -1,6 +1,36 @@
 # CitySync
 
-CitySync is a location-aware meetup platform built with a modern full-stack architecture. It combines a modular monolith backend and Redis-driven async workers to deliver responsive APIs and scalable event workflows.
+CitySync is a full-stack meetup platform built around
+**asynchronous processing**, **redis-backed workers**, and
+**geospatial feed ranking**.
+
+> Unlike a typical CRUD app, CitySync offloads notifications and feed computation to background workers, keeping API responses fast and predictable.
+
+## Design Decisions
+
+- **Modular Monolith over Microservices**  
+  Chosen to keep deployment simple while enforcing strict domain boundaries.
+
+- **Redis for Async Processing**  
+  Used to decouple side effects from HTTP request flow and ensure fast API responses.
+
+- **Presigned S3 Uploads**  
+  Keeps backend stateless and avoids large file handling.
+
+## Monorepo Structure
+
+```text
+.
+|-- apps/
+|   |-- frontend/
+|   `-- backend/
+|-- package.json
+|-- pnpm-workspace.yaml
+`-- README.md
+```
+
+## Production Environment
+![Prod](docs/screenshots/prod3.png)
 
 ## Tech Stack
 
@@ -23,20 +53,6 @@ CitySync is a location-aware meetup platform built with a modern full-stack arch
 - Redis workers
 - Railway deployment
 
-## Monorepo Structure
-
-```text
-.
-|-- apps/
-|   |-- frontend/
-|   `-- backend/
-|-- package.json
-|-- pnpm-workspace.yaml
-`-- README.md
-```
-
-## Production Environment
-![Prod](docs/screenshots/prod.png)
 
 ## Architecture
 
