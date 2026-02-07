@@ -46,7 +46,7 @@ app.get("/health", (_req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log("DB_URL -> ", process.env.DATABASE_URL)
+  console.log("DB_URL -> ", process.env.DB_CONNECT)
   console.log(`Server running on ${PORT}`);
 });
 
