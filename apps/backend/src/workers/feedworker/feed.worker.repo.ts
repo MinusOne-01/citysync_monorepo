@@ -1,4 +1,4 @@
-import { prisma } from "../../configs/db";
+import { prisma } from "../../shared/configs/db";
 
 export class FeedWorkerRepository {
 

@@ -2,7 +2,7 @@ import { Router } from "express"
 import { RegisterSchema, LoginSchema, RefreshSchema } from "./auth.schema"
 import { authService } from "./auth.service"
 import { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } from "./auth.utils"
-import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
+import { defaultRateLimiter } from "../../shared/middleware/useRateLimiter";
 
 export function registerAuthRoutes(router: Router) {
 
@@ -26,7 +26,7 @@ export function registerAuthRoutes(router: Router) {
     }
 
   })
-  
+
   router.post("/auth/login", async (req, res, next) => {
 
     try {
@@ -39,16 +39,16 @@ export function registerAuthRoutes(router: Router) {
       const tokens = await authService.login(parsed.data)
       setAuthCookies(res, tokens)
       return res.json({ ok: true })
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
   })
-  
+
   router.post("/auth/refresh", async (req, res, next) => {
 
-  try {
+    try {
 
       const refreshToken = req.cookies[REFRESH_COOKIE]
       if (!refreshToken) {
@@ -59,17 +59,17 @@ export function registerAuthRoutes(router: Router) {
       const tokens = await authService.refresh(refreshToken)
       setAuthCookies(res, tokens)
       return res.json({ ok: true })
-    } 
+    }
     catch (err) {
       clearAuthCookies(res)
       return next(err)
     }
 
-})
+  })
 
-router.post("/auth/logout", async (req, res, next) => {
+  router.post("/auth/logout", async (req, res, next) => {
 
-  try {
+    try {
 
       const refreshToken = req.cookies[REFRESH_COOKIE]
       if (refreshToken) {
@@ -77,12 +77,12 @@ router.post("/auth/logout", async (req, res, next) => {
       }
       clearAuthCookies(res)
       return res.status(204).send()
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
-})
+  })
 
 }
 

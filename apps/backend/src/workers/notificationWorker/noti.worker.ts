@@ -1,5 +1,5 @@
-import { redis } from "../../configs/redis";
-import { handleNotification } from "../../utils/noti.handler";
+import { redis } from "../../shared/configs/redis";
+import { handleNotification } from "../../shared/utils/notifications/noti.handler";
 
 const STREAM = "notifications:events";
 const GROUP = "notification-workers";
@@ -62,30 +62,30 @@ async function processMessages(res: any) {
 
 
 export async function runNotificationWorker() {
-    
-  await ensureGroup();
 
-  await processPending();
+    await ensureGroup();
 
-  while (true) {
-      const res = await redis.xreadgroup(
-          "GROUP",
-          GROUP,
-          CONSUMER,
-          "COUNT",
-          10,
-          "BLOCK",
-          5000,
-          "STREAMS",
-          STREAM,
-          ">"
-      );
+    await processPending();
 
-    if (!res) continue;
+    while (true) {
+        const res = await redis.xreadgroup(
+            "GROUP",
+            GROUP,
+            CONSUMER,
+            "COUNT",
+            10,
+            "BLOCK",
+            5000,
+            "STREAMS",
+            STREAM,
+            ">"
+        );
 
-    await processMessages(res);
+        if (!res) continue;
 
-  }
+        await processMessages(res);
+
+    }
 
 }
 

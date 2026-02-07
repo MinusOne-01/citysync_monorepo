@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "../../shared/configs/db";
 import { NewUserInput, UserDbRecord, UserUpdateInput } from "./user.type";
-import { deleteS3Object } from "../../shared/configs/s3.service";
+import { deleteS3Object } from "../../shared/utils/s3.service";
 
 export interface UserRepository {
     createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord>;
@@ -11,10 +11,10 @@ export interface UserRepository {
 }
 
 class UserRepositoryImpl implements UserRepository {
-    
+
     async createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord> {
-        
-        const newUser = await tx.user.create({  
+
+        const newUser = await tx.user.create({
             data: {
                 authAccountId: data.authAccountId,
                 username: data.username,
@@ -39,7 +39,7 @@ class UserRepositoryImpl implements UserRepository {
     }
 
     async findByUsername(username: string): Promise<UserDbRecord | null> {
-        
+
         const record = await prisma.user.findUnique({
             where: { username },
         });
@@ -54,7 +54,7 @@ class UserRepositoryImpl implements UserRepository {
 
         let oldKey: string | null | undefined = null;
 
-        if(updateData.profileImageKey !== null){
+        if (updateData.profileImageKey !== null) {
             const user = await prisma.user.findUnique({
                 where: { id: userId }
             });
@@ -68,12 +68,12 @@ class UserRepositoryImpl implements UserRepository {
         });
 
         if (oldKey && oldKey !== updatedRecord.profileImageKey) {
-            try{        
+            try {
                 await deleteS3Object(oldKey);
             } catch (err) {
                 console.error("Failed to delete orphaned S3 object:", oldKey, err);
             }
-        }    
+        }
 
         return updatedRecord;
     }

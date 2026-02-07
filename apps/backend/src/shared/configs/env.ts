@@ -23,6 +23,7 @@ function optionalNumber(name: string): number | undefined {
 export const env = {
   PORT: process.env.PORT || 3001,
   nodeEnv: process.env.NODE_ENV,
+  ORIGIN_URL: requireEnv("ORIGIN_URL"),
 
   AWS_REGION: requireEnv("AWS_REGION"),
   AWS_ACCESS_KEY_ID: requireEnv("AWS_ACCESS_KEY_ID"),

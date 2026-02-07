@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { getFeedSchema } from "./feed.schema";
 import { feedService } from "./feed.service";
-import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
+import { defaultRateLimiter } from "../../shared/middleware/useRateLimiter";
 
 
 export function registerFeedRoutes(router: Router) {
-   
+
     router.get("/feed", defaultRateLimiter, async (req, res, next) => {
 
         try {
@@ -26,6 +26,6 @@ export function registerFeedRoutes(router: Router) {
         }
 
     });
-    
+
 }
 

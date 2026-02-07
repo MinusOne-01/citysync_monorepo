@@ -2,14 +2,14 @@ import { Router } from "express"
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 import { userService } from "./user.service";
 import { createUserSchema, userUploadCompleteSchema, updateUserSchema, userParamsSchema, userUploadUrlSchema } from "./user.schema";
-import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
+import { defaultRateLimiter } from "../../shared/middleware/useRateLimiter";
 
 export function registeredUserRoutes(router: Router) {
 
   router.use(defaultRateLimiter)
 
   router.get("/user/me", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
-     
+
     try {
 
       if (!req.user) {
@@ -24,13 +24,13 @@ export function registeredUserRoutes(router: Router) {
       }
 
       return res.status(200).json({ user })
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
   });
-  
+
   router.put("/user/update", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
@@ -47,14 +47,14 @@ export function registeredUserRoutes(router: Router) {
       const userId = req.user.userId
       const updatedUser = await userService.updateUser(userId, parsed.data)
       return res.status(200).json({ user: updatedUser })
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
   });
 
-  router.post("/user/profile-upload-url", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
+  router.post("/user/profile-upload-url", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
 
@@ -70,12 +70,12 @@ export function registeredUserRoutes(router: Router) {
       const userId = req.user.userId
       const uploadData = await userService.getProfileUploadUrl(userId, parsed.data.fileType)
       return res.status(200).json({ uploadData })
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
-    });
+  });
 
   router.put("/user/profile-upload-complete", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
@@ -93,7 +93,7 @@ export function registeredUserRoutes(router: Router) {
       const userId = req.user.userId
       const updatedUser = await userService.updateUser(userId, parsed.data)
       return res.status(200).json({ user: updatedUser })
-    } 
+    }
     catch (err) {
       return next(err)
     }
@@ -101,7 +101,7 @@ export function registeredUserRoutes(router: Router) {
   });
 
   router.get("/user/:username", async (req, res, next) => {
-    
+
     try {
 
       const parsed = userParamsSchema.safeParse(req.params)
@@ -115,12 +115,12 @@ export function registeredUserRoutes(router: Router) {
       }
 
       return res.status(200).json({ user: userAcc })
-    } 
+    }
     catch (err) {
       return next(err)
     }
 
-  }); 
+  });
 
 }
 

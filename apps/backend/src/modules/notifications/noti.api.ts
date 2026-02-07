@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware, AuthenticatedRequest } from "../auth"
 import { notiService } from "./noti.service";
 import { updateNotiSchema } from "./noti.schema";
-import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
+import { defaultRateLimiter } from "../../shared/middleware/useRateLimiter";
 
 export function registerNotificationsRoutes(router: Router) {
 
@@ -20,7 +20,7 @@ export function registerNotificationsRoutes(router: Router) {
 
             const result = await notiService.getUserNoti({ userId, limit, cursor });
             return res.status(200).json(result);
-        } 
+        }
         catch (err) {
             return next(err);
         }
@@ -43,7 +43,7 @@ export function registerNotificationsRoutes(router: Router) {
 
             const result = await notiService.markIsRead({ userId, recordId })
             return res.status(200).json(result);
-        } 
+        }
         catch (err) {
             return next(err);
         }
@@ -53,18 +53,18 @@ export function registerNotificationsRoutes(router: Router) {
     router.patch("/notifications/read-all", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
         try {
-            
+
             if (!req.user) return res.status(401).json({ error: "User context missing" });
 
             const userId = req.user.userId;
             const result = await notiService.markIsReadBulk({ userId })
             return res.status(200).json(result);
-        } 
+        }
         catch (err) {
             return next(err);
         }
 
     });
-   
+
 }
 

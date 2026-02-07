@@ -2,16 +2,16 @@ import { Router } from "express";
 import { ChangeStatusSchema, MeetupSchema } from "./participate.schema";
 import { participateService } from "./participate.service";
 import { authMiddleware, AuthenticatedRequest } from "../auth"
-import { defaultRateLimiter } from "../../shared/middleware/userRateLimiter";
+import { defaultRateLimiter } from "../../shared/middleware/useRateLimiter";
 
 export function registerParticipateRoutes(router: Router) {
 
   router.use(defaultRateLimiter)
 
   router.post("/participate/:id/join", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
-    
+
     try {
-      
+
       if (!req.user) {
         return res.status(401).json({ error: "User context missing" });
       }
@@ -73,7 +73,7 @@ export function registerParticipateRoutes(router: Router) {
 
   });
 
-  router.get("/participate/:id/status", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
+  router.get("/participate/:id/status", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
 
@@ -105,7 +105,7 @@ export function registerParticipateRoutes(router: Router) {
 
   });
 
-  router.get("/participate/:id/get-participants", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
+  router.get("/participate/:id/get-participants", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
 
@@ -134,7 +134,7 @@ export function registerParticipateRoutes(router: Router) {
 
   });
 
-  router.put("/participate/:id/change-participant-status", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
+  router.put("/participate/:id/change-participant-status", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
 
@@ -173,7 +173,7 @@ export function registerParticipateRoutes(router: Router) {
 
   });
 
-  router.get("/participate/get-user-history", authMiddleware,  async (req: AuthenticatedRequest, res, next) => {
+  router.get("/participate/get-user-history", authMiddleware, async (req: AuthenticatedRequest, res, next) => {
 
     try {
 

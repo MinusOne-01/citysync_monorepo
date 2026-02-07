@@ -1,4 +1,4 @@
-import { redis } from "../configs/redis";
+import { redis } from "../../configs/redis";
 import { NotificationEvent } from "./noti.events";
 
 export async function publishNotificationEvent(

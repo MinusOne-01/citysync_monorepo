@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { userRepo } from "./user.repo";
 import { AppError } from "../../shared/configs/errors";
-import { getPresignedUploadUrl } from "../../shared/configs/s3.service";
+import { getPresignedUploadUrl } from "../../shared/utils/s3.service";
 import { env } from "../../shared/configs/env";
 import { UserProfile } from "./user.type";
 import { NewUserInput, UserUpdateInput, UserDbRecord, SignedUrlResponse } from "./user.type";
@@ -20,7 +20,7 @@ export interface UserService {
 }
 
 class UserServiceImpl implements UserService {
-    
+
     private getPublicURL(key: string): string {
         const url = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
         return url;
@@ -28,11 +28,11 @@ class UserServiceImpl implements UserService {
 
     async createUser(data: NewUserInput, tx: Prisma.TransactionClient): Promise<UserDbRecord> {
 
-        try{
+        try {
             return await userRepo.createUser(data, tx);
         }
-        catch(err: any){
-             if (err?.code === "P2002") {
+        catch (err: any) {
+            if (err?.code === "P2002") {
                 throw new AppError("Username already taken")
             }
             throw err
@@ -41,8 +41,8 @@ class UserServiceImpl implements UserService {
     }
 
     async getProfileUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse> {
-        
-        if(!fileType.startsWith("image/")){
+
+        if (!fileType.startsWith("image/")) {
             throw new AppError("Invalid file type. Only image files are allowed.");
         }
 
@@ -52,9 +52,9 @@ class UserServiceImpl implements UserService {
 
     async findUserbyId(id: string): Promise<UserProfile | null> {
 
-        const user =  await userRepo.findById(id);
+        const user = await userRepo.findById(id);
 
-        if(!user) return null;
+        if (!user) return null;
 
         const userProfile = {
             id: user.id,
@@ -69,7 +69,7 @@ class UserServiceImpl implements UserService {
     }
 
     async findUserbyAuthId(authId: string): Promise<UserDbRecord | null> {
-        const user =  await userRepo.findByAuthId(authId);
+        const user = await userRepo.findByAuthId(authId);
         return user;
     }
 
@@ -77,7 +77,7 @@ class UserServiceImpl implements UserService {
 
         let user = await userRepo.findByUsername(username);
 
-        if(!user) return null;
+        if (!user) return null;
 
         const userProfile = {
             id: user.id,
@@ -87,12 +87,12 @@ class UserServiceImpl implements UserService {
         }
 
         return userProfile;
-    }   
+    }
 
     async updateUser(userId: string, updateData: Partial<UserUpdateInput>): Promise<Partial<UserDbRecord>> {
 
         const user = await userRepo.updateUser(userId, updateData);
-        
+
         const userProfile = {
             username: user.username,
             displayName: user.displayName,

@@ -3,7 +3,7 @@ import { ChangeParticipantStatusInput, ChangeParticipantStatusResponse, GetMeetu
 import { meetupService } from "../meetups/meetup.service";
 import { userService } from "../user";
 import { AppError } from "../../shared/configs/errors";
-import { publishNotificationEvent } from "../../shared/utils/noti.producer";
+import { publishNotificationEvent } from "../../shared/utils/notifications/noti.producer";
 
 
 export interface ParticipateService {
@@ -26,7 +26,7 @@ class ParticipateServiceImpl implements ParticipateService {
     }
 
     async joinMeetup(input: JoinMeetupInput): Promise<JoinMeetupResponse> {
-        
+
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
         if (!meetupRecord) {
             throw new AppError("Meetup not found");
@@ -65,7 +65,7 @@ class ParticipateServiceImpl implements ParticipateService {
     }
 
     async leaveMeetup(input: LeaveMeetupInput): Promise<LeaveMeetupResponse> {
-        
+
         const dbInput = {
             userId: input.userId,
             meetupId: input.meetupId
@@ -93,23 +93,23 @@ class ParticipateServiceImpl implements ParticipateService {
 
         const data = await participateRepo.fetchParticipantStatus(dbInput);
 
-        if(!data){
+        if (!data) {
             throw new AppError("Partiticipation not found");
         }
 
         return data;
-        
+
     }
 
     async getMeetupParticipants(input: GetMeetupParticipantsInput): Promise<GetMeetupParticipantsResponse> {
-        
+
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
 
         if (!meetupRecord) {
             throw new AppError("Meetup not found");
         }
 
-        if(input.userId !== meetupRecord.organizerId){
+        if (input.userId !== meetupRecord.organizerId) {
             throw new AppError("User is not the Meetup organiser")
         }
 
@@ -124,22 +124,22 @@ class ParticipateServiceImpl implements ParticipateService {
     }
 
     async changeParticipantStatus(input: ChangeParticipantStatusInput): Promise<ChangeParticipantStatusResponse> {
-        
+
         const meetupRecord = await this.fetchMeetupDetails(input.meetupId);
 
         if (!meetupRecord) {
             throw new AppError("Meetup not found");
         }
 
-        if(input.creatorId !== meetupRecord.organizerId){
+        if (input.creatorId !== meetupRecord.organizerId) {
             throw new AppError("User dont own this Meetup")
         }
-        
-        if(meetupRecord.status !== "PUBLISHED"){
+
+        if (meetupRecord.status !== "PUBLISHED") {
             throw new AppError("Only published Meetup participant status can be changed")
         }
 
-        if(input.newStatus === "CONFIRMED"){
+        if (input.newStatus === "CONFIRMED") {
 
             const participantRecord = await this.fetchUserDetails(input.participantId);
             if (!participantRecord) {
@@ -165,7 +165,7 @@ class ParticipateServiceImpl implements ParticipateService {
             await participateRepo.approveParticipantStatus(dbInput)
 
         }
-        else if(input.newStatus === "CANCELLED"){
+        else if (input.newStatus === "CANCELLED") {
 
             const dbInput = {
                 userId: input.participantId,
@@ -175,7 +175,7 @@ class ParticipateServiceImpl implements ParticipateService {
 
             await participateRepo.cancelParticipantStatus(dbInput)
         }
-        else{
+        else {
             throw new AppError("Invalid participation state transition");
         }
 
@@ -197,7 +197,7 @@ class ParticipateServiceImpl implements ParticipateService {
     }
 
     async getParticipantHistory(input: GetParticipantHistoryInput): Promise<GetParticipantHistoryResponse> {
-        return await participateRepo.fetchParticipantHistory({userId: input.userId});
+        return await participateRepo.fetchParticipantHistory({ userId: input.userId });
     }
 
 }

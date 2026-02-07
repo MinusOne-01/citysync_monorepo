@@ -1,8 +1,8 @@
 import { AppError } from "../../shared/configs/errors"
-import { getPresignedUploadUrl } from "../../shared/configs/s3.service"
+import { getPresignedUploadUrl } from "../../shared/utils/s3.service"
 import { meetupRepo } from "./meetup.repo"
 import { env } from "../../shared/configs/env";
-import { publishNotificationEvent } from "../../shared/utils/noti.producer";
+import { publishNotificationEvent } from "../../shared/utils/notifications/noti.producer";
 
 const BUCKET = env.AWS_S3_BUCKET!;
 const REGION = env.AWS_REGION!;
@@ -63,7 +63,7 @@ export interface MeetupService {
     organizerId: string,
     input: CreateMeetupInput
   ): Promise<MeetupId>
-  
+
   getMeetupUploadUrl(
     userId: string,
     fileType: string
@@ -100,12 +100,12 @@ class MeetupServiceImpl implements MeetupService {
   }
 
   private getPublicURL(key: string): string {
-        const url = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
-        return url;
+    const url = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+    return url;
   }
 
   async getMeetupUploadUrl(userId: string, fileType: string): Promise<SignedUrlResponse> {
-          
+
     if (!fileType.startsWith("image/")) {
       throw new AppError("Invalid file type. Only image files are allowed.");
     }
@@ -117,8 +117,7 @@ class MeetupServiceImpl implements MeetupService {
   async createMeetup(
     organizerId: string,
     input: CreateMeetupInput
-  ): Promise<MeetupId>
-  {
+  ): Promise<MeetupId> {
     this.validateStartTime(input.startTime);
     return await meetupRepo.insert(organizerId, input)
   }
@@ -132,7 +131,7 @@ class MeetupServiceImpl implements MeetupService {
     }
 
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);
-    
+
     const meetupData = {
       id: meetup.id,
       organizerId: meetup.organizerId,
@@ -159,13 +158,13 @@ class MeetupServiceImpl implements MeetupService {
     if (!meetup) {
       throw new AppError("Meetup not found", 404);
     }
-    
-    if(meetup.organizerId !== creatorId){
+
+    if (meetup.organizerId !== creatorId) {
       throw new AppError("User is not the creator of Meetup", 404);
     }
 
     const imageUrl = this.getPublicURL(meetup.meetupImageKey);
-    
+
     const meetupData = {
       id: meetup.id,
       organizerId: meetup.organizerId,
@@ -188,8 +187,7 @@ class MeetupServiceImpl implements MeetupService {
 
   async publishMeetup(
     meetupId: MeetupId,
-    organizerId: string)
-  {
+    organizerId: string) {
     await meetupRepo.updateStatus(meetupId, organizerId, "PUBLISHED", ["DRAFT", "PUBLISHED"]);
   }
 
@@ -198,7 +196,7 @@ class MeetupServiceImpl implements MeetupService {
     organizerId: string,
     input: EditMeetupInput
   ) {
-    
+
     if (input.startTime) this.validateStartTime(input.startTime)
 
     const meetupRecord = await meetupRepo.editMeetupDetails(meetupId, organizerId, input)
@@ -213,7 +211,7 @@ class MeetupServiceImpl implements MeetupService {
         }
       })
     }
-    
+
   }
 
   async cancelMeetup(meetupId: MeetupId, organizerId: string) {

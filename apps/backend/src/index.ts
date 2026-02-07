@@ -12,14 +12,15 @@ import { registerParticipateRoutes } from "./modules/participate"
 import { registerFeedRoutes } from "./modules/feed"
 import { registerNotificationsRoutes } from "./modules/notifications"
 
-const PORT = env.PORT || 3001;
+const PORT = env.PORT
+const ORIGIN_URL = env.ORIGIN_URL
 
 const app = express()
 const router = express.Router()
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ORIGIN_URL,
     credentials: true
   })
 )
@@ -46,7 +47,6 @@ app.get("/health", (_req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log("DB_URL -> ", process.env.DB_CONNECT)
   console.log(`Server running on ${PORT}`);
 });
 

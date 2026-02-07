@@ -1,4 +1,4 @@
-import { prisma } from "../configs/db";
+import { prisma } from "../../configs/db";
 
 export async function handleNotification(type: string, payload: any) {
   switch (type) {
@@ -31,7 +31,7 @@ export async function handleNotification(type: string, payload: any) {
       const notificationsData = participants.map((p) => ({
         userId: p.userId,
         type: "MEETUP_UPDATED" as const,
-        data: payload, 
+        data: payload,
       }));
 
       await prisma.notification.createMany({
@@ -39,6 +39,6 @@ export async function handleNotification(type: string, payload: any) {
         skipDuplicates: true,
       });
 
-      break; 
+      break;
   }
 }
