@@ -2,7 +2,7 @@ import "dotenv/config"
 import { runFeedWorker } from "./feed.worker";
 
 async function start() {
-  console.log("[feed-worker] booting");
+  console.log("[feed-worker] booting...");
 
   await runFeedWorker();             
   setInterval(runFeedWorker, 60_000); 
